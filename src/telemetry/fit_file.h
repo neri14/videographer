@@ -8,9 +8,10 @@ namespace telemetry {
 
 class fit_file : public file {
 public:
-    fit_file(std::string path);
+    fit_file(const std::string& path);
     ~fit_file() = default;
 
+private:
     void load() override;
 };
 

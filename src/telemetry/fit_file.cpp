@@ -5,7 +5,7 @@
 namespace vgraph {
 namespace telemetry {
 
-fit_file::fit_file(std::string path)
+fit_file::fit_file(const std::string& path)
     : file(path)
 {}
 
