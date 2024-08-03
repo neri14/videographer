@@ -1,0 +1,47 @@
+name: Unit tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
+
+    - name: Print env
+      run: |
+        echo github.event.action: ${{ github.event.action }}
+        echo github.event_name: ${{ github.event_name }}
+        cmake --version
+        gcc --version
+
+    - name: Configure CMake
+      run: cmake -B ${{github.workspace}}/build
+
+    - name: Build unit tests
+      run: cmake --build ${{github.workspace}}/build --target vgraph_test
+
+    - name: Upload unit test binary
+      uses: actions/upload-artifact@v4
+      with:
+        name: vgraph_test
+        path: ${{github.workspace}}/build/vgraph_test
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download unit test binary
+      uses: actions/download-artifact@v4
+      with:
+        name: vgraph_test
+        path: ${{github.workspace}}/vgraph_test
+    - name: Run unit tests
+      run: ./vgraph_test
