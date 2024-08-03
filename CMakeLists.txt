@@ -6,12 +6,10 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # static library
 add_library(vgraph_lib STATIC)
-set_property(TARGET vgraph_lib PROPERTY CXX_STANDARD 23)
 target_include_directories(vgraph_lib PUBLIC src)
 
 # executable
 add_executable(vgraph)
-set_property(TARGET vgraph PROPERTY CXX_STANDARD 23)
 target_link_libraries(vgraph PRIVATE vgraph_lib)
 
 # source subdirectory
