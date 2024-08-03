@@ -10,15 +10,18 @@ target_include_directories(vgraph_lib PUBLIC src)
 
 # executable
 add_executable(vgraph)
-target_link_libraries(vgraph PRIVATE vgraph_lib)
+
+add_subdirectory(3rdparty/garmin_fit_sdk)
+target_link_libraries(vgraph PRIVATE vgraph_lib garmin)
 
 # source subdirectory
 add_subdirectory(src)
 
 # UNIT TESTING
+add_executable(vgraph_test)
+
 add_subdirectory(3rdparty/googletest)
 
-add_executable(vgraph_test)
 target_link_libraries(vgraph_test PRIVATE GTest::gmock_main vgraph_lib)
 
 # tests subdirectory
