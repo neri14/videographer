@@ -4,9 +4,5 @@ target_sources(vgraph
     PRIVATE
         main.cpp
 )
-target_sources(vgraph_lib
-    PRIVATE
-        greeter.cpp
-    PUBLIC
-        greeter.h
-)
+
+add_subdirectory(telemetry)

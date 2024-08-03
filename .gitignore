@@ -9,6 +9,3 @@ build
 *.a
 vgraph
 vgraph_test
-
-#misc
-.vscode
