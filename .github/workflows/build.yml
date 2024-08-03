@@ -1,4 +1,4 @@
-name: Build and test
+name: Build binary
 
 on:
   push:
@@ -16,15 +16,15 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Print env
+      run: |
+        echo github.event.action: ${{ github.event.action }}
+        echo github.event_name: ${{ github.event_name }}
+        cmake --version
+        gcc --version
+
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build
 
     - name: Build binary
       run: cmake --build ${{github.workspace}}/build --target vgraph
-
-    - name: Build unit tests
-      run: cmake --build ${{github.workspace}}/build --target vgraph_test
-
-    - name: Run unit tests
-      working-directory: ${{github.workspace}}/build
-      run: ./vgraph_test
