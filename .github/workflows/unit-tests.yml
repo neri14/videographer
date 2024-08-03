@@ -37,6 +37,7 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    needs: build
     steps:
     - name: Download unit test binary
       uses: actions/download-artifact@v4
