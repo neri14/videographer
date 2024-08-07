@@ -3,7 +3,7 @@
 
 #include "datapoint.h"
 
-#include <string>
+#include <filesystem>
 #include <memory>
 
 namespace vgraph {
@@ -14,7 +14,7 @@ public:
     parser() = default;
     ~parser() = default;
 
-    virtual std::shared_ptr<datapoint_sequence> parse(const std::string& path) = 0;
+    virtual std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path) = 0;
 };
 
 } // namespace telemetry

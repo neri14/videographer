@@ -11,7 +11,7 @@ public:
     fit_parser() = default;
     ~fit_parser() = default;
 
-    std::shared_ptr<datapoint_sequence> parse(const std::string& path) override;
+    std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path) override;
 };
 
 } // namespace telemetry
