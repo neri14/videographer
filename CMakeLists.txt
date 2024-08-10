@@ -37,7 +37,7 @@ add_subdirectory(test)
 target_include_directories(vgraph_test PRIVATE test)
 
 # link libraries to test executable
-target_link_libraries(vgraph_test PRIVATE GTest::gmock_main vgraph_lib garmin)
+target_link_libraries(vgraph_test PRIVATE GTest::gmock vgraph_lib garmin)
 
 # setup gtest
 include(GoogleTest)

@@ -44,7 +44,7 @@ protected:
     std::ostringstream sink_stream;
 };
 
-TEST_F(logger_test, debug_sink_prints_all_levels)
+TEST_F(logger_test, debug_sink_receives_all_logs)
 {
     backend::get_instance().add_sink(ELogLevel::Debug, sink);
     logger uut(consts::logger_name);
@@ -68,7 +68,7 @@ TEST_F(logger_test, debug_sink_prints_all_levels)
     ASSERT_EQ(consts::expected_error, sink_stream.str());
 }
 
-TEST_F(logger_test, info_sink_prints_info_warning_error_only)
+TEST_F(logger_test, info_sink_receives_info_warning_error_logs_only)
 {
     backend::get_instance().add_sink(ELogLevel::Info, sink);
     logger uut(consts::logger_name);
@@ -92,7 +92,7 @@ TEST_F(logger_test, info_sink_prints_info_warning_error_only)
     ASSERT_EQ(consts::expected_error, sink_stream.str());
 }
 
-TEST_F(logger_test, warning_sink_prints_warning_error_only)
+TEST_F(logger_test, warning_sink_receives_warning_error_logs_only)
 {
     backend::get_instance().add_sink(ELogLevel::Warning, sink);
     logger uut(consts::logger_name);
@@ -116,7 +116,7 @@ TEST_F(logger_test, warning_sink_prints_warning_error_only)
     ASSERT_EQ(consts::expected_error, sink_stream.str());
 }
 
-TEST_F(logger_test, error_sink_prints_error_only)
+TEST_F(logger_test, error_sink_receives_error_logs_only)
 {
     backend::get_instance().add_sink(ELogLevel::Error, sink);
     logger uut(consts::logger_name);
