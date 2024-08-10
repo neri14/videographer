@@ -6,3 +6,4 @@ target_sources(vgraph
 )
 
 add_subdirectory(telemetry)
+add_subdirectory(utils)

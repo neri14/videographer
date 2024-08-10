@@ -51,6 +51,7 @@ TEST_F(fit_parser_test, parse_correct_file_returns_sequence)
     ASSERT_NE(nullptr, retval);
 
     //TODO to be implemented
+    
 }
 
 } // namespace telemetry
