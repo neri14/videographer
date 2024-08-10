@@ -1,7 +1,5 @@
 #include "logger.h"
 
-#include <format>
-
 namespace vgraph {
 namespace utils {
 namespace logging {

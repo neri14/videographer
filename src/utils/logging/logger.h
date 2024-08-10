@@ -1,6 +1,7 @@
 #ifndef LOGGER_H
 #define LOGGER_H
 
+#include <format>
 #include <string>
 
 #include "log_level.h"
