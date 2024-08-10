@@ -3,6 +3,8 @@
 
 #include "parser.h"
 
+#include "utils/logging/logger.h"
+
 namespace vgraph {
 namespace telemetry {
 
@@ -12,6 +14,9 @@ public:
     ~fit_parser() = default;
 
     std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path) override;
+
+private:
+    utils::logging::logger log{"fit_parser"};
 };
 
 } // namespace telemetry
