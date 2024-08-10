@@ -5,8 +5,6 @@
 
 #include <gtest/gtest.h>
 
-#include <filesystem>//FIXME REMOVE
-
 namespace vgraph {
 namespace utils {
 namespace logging {
