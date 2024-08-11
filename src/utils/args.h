@@ -5,9 +5,11 @@ namespace vgraph {
 namespace utils {
 
 struct args {
-    bool debug;
+    bool help = false;
+    bool debug = false;
 
     static args parse(int argc, char* argv[]);
+    static void print_help();
 };
 
 } // namespace utils
