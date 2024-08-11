@@ -24,8 +24,8 @@ jobs:
         echo github.event.action: ${{ github.event.action }}
         echo github.event_name: ${{ github.event_name }}
         cmake --version
-        $(CC) --version
-        $(CXX) --version
+        $CC --version
+        $CXX --version
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build
