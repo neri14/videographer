@@ -82,6 +82,7 @@
         "typeinfo": "cpp",
         "valarray": "cpp",
         "variant": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "span_ext": "cpp"
     }
 }

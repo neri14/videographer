@@ -1,20 +1,33 @@
 #include <iostream>
 
-#include "utils/args.h"
+// #include "utils/args.h"
+#include "utils/argument_parser.h"
 
 int main(int argc, char* argv[])
 {
-    vgraph::utils::args a = vgraph::utils::args::parse(argc, argv);
+    vgraph::utils::argument_parser parser("vgraph");
 
-    if (a.help) {
-        vgraph::utils::args::print_help();
-        return 0;
+    {
+        using vgraph::utils::argument;
+        using vgraph::utils::EArgType;
+        parser.add_argument("help", argument().option("-h").option("--help").flag().description("Print this help message"));
+        parser.add_argument("debug", argument().option("-d").option("--debug").flag().description("Enable debug logs"));
+        parser.add_argument("telemetry", argument().option("-t").option("--telemetry").mandatory().argtype(EArgType::String).description("Telemetry file path"));
     }
 
-    if (a.debug)
-        std::cout << "DEBUG" << std::endl;
-    else
-        std::cout << "NO DEBUG" << std::endl;
+    parser.print_help();
+
+    // vgraph::utils::args a = vgraph::utils::args::parse(argc, argv);
+
+    // if (a.help) {
+    //     vgraph::utils::args::print_help();
+    //     return 0;
+    // }
+
+    // if (a.debug)
+    //     std::cout << "DEBUG" << std::endl;
+    // else
+    //     std::cout << "NO DEBUG" << std::endl;
 
     return 0;
 }

@@ -1,8 +1,7 @@
 #include "args.h"
-#include <utility>
 
 #include <cstring>
-
+#include <utility>
 #include <iostream>
 
 namespace vgraph {
@@ -24,8 +23,8 @@ args args::parse(int argc, char* argv[])
 
 void args::print_help()
 {
-    std::cout << "Usage: vgraph [flags]" << std::endl;
-    std::cout << "Flags:" << std::endl;
+    std::cout << "Usage: vgraph [-h][-d]" << std::endl;
+    std::cout << "Arguments:" << std::endl;
     std::cout << "  -h, --help    Print this help message" << std::endl;
     std::cout << "  -d, --debug   Enable debug logs" << std::endl;
 }
