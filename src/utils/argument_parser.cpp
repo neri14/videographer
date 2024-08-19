@@ -106,8 +106,13 @@ void argument_parser::add_argument(const std::string& key, const argument& arg)
 
 void argument_parser::print_help() const
 {
+    print_help_usage();
+    print_help_details();
+}
+
+void argument_parser::print_help_usage() const
+{
     std::string opts;
-    std::vector<std::string> details;
 
     for (const std::string& key : keys_) {
         const auto& arg = arguments_.at(key);
@@ -128,23 +133,39 @@ void argument_parser::print_help() const
         } else {
             opts += std::format("[{}]", str);
         }
-
-        // std::string det = std::format("  {:<16}   {}", )
     }
 
     std::cout << std::format("Usage: {} {}", binary_name_, opts) << std::endl;
-    std::cout << "Arguments:" << std::endl;
-
-    //TODO printing details as below example
 }
 
-// void args::print_help()
-// {
-//     std::cout << "Usage: vgraph [-h][-d]" << std::endl;
-//     std::cout << "Arguments:" << std::endl;
-//     std::cout << "  -h, --help    Print this help message" << std::endl;
-//     std::cout << "  -d, --debug   Enable debug logs" << std::endl;
-// }
+void argument_parser::print_help_details() const
+{
+    std::cout << "Arguments:" << std::endl;
+
+
+    for (const std::string& key : keys_) {
+        const auto& arg = arguments_.at(key);
+
+        std::string str = std::accumulate(
+            arg.options_.begin(),
+            arg.options_.end(),
+            std::string{},
+            [](const std::string& prev, const std::string& add){
+                return prev.empty() ? add : std::format("{},{}", prev, add);
+            });
+
+        if (!arg.is_flag_) {
+            str = std::format("{} {}", str, helper::to_upper(key));
+        }
+
+        if (str.length() > 20) {
+            std::cout << std::format("  {}", str) << std::endl;
+            std::cout << std::format("                    {}", arg.description_) << std::endl;
+        } else {
+            std::cout << std::format("  {:<16}  {}", str, arg.description_) << std::endl;
+        }
+    }
+}
 
 } // namespace utils
 } // namespace vgraph

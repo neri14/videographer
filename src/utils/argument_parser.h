@@ -53,8 +53,6 @@ struct argument {
 //     bool bool_value;
 // };
 
-
-
 class argument_parser {
 public:
     argument_parser(const std::string binary_name);
@@ -67,6 +65,9 @@ public:
     void print_help() const;
 
 private:
+    void print_help_usage() const;
+    void print_help_details() const;
+
     const std::string binary_name_;
 
     std::vector<std::string> keys_;
