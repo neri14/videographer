@@ -22,14 +22,10 @@ private:
 struct argument {
     argument& option(const std::string& opt);
     argument& flag();
-    argument& mandatory();
-    argument& max_count(int max);
     argument& description(const std::string& desc);
 
     std::vector<std::string> options_ = {};
     bool is_flag_ = false;
-    bool is_mandatory_ = false;
-    int max_count_ = 1;
     std::string description_ = "";
 };
 
@@ -59,11 +55,11 @@ private:
 
     const std::string binary_name_;
 
-    std::vector<std::string> keys_;
-    std::map<std::string, argument> arguments_;
-    std::map<std::string, std::string> options_;
+    std::vector<std::string> keys_; // vector of all supported keys in order of addition
+    std::map<std::string, argument> arguments_; // mapping argument keys to argument objects
+    std::map<std::string, std::string> options_; // mapping options to argument keys
 
-    std::map<std::string, std::optional<std::string>> values_;
+    std::map<std::string, std::vector<std::string>> values_; // parsed values of parsed keys mapped to optional raw value
 };
 
 } // namespace utils

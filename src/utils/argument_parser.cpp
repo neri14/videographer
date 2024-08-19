@@ -43,27 +43,9 @@ argument& argument::option(const std::string& opt)
 
 argument& argument::flag()
 {
-    if (is_mandatory_)
-        throw argument_exception("Mandatory argument set as flag");
-
     is_flag_ = true;
     return *this;
 }
-
-argument& argument::mandatory()
-{
-    if (is_flag_)
-        throw argument_exception("Flag set as mandatory");
-
-    is_mandatory_ = true;
-    return *this;
-};
-
-argument& argument::max_count(int max) 
-{
-    max_count_ = max;
-    return *this;
-};
 
 argument& argument::description(const std::string& desc)
 {
@@ -96,7 +78,30 @@ void argument_parser::add_argument(const std::string& key, const argument& arg)
 
 void argument_parser::parse(int argc, char* argv[])
 {
-    //TODO to be implemented: void argument_parser::parse(int argc, char* argv[])
+    for (int i=1; i<argc; i++) {
+        std::string opt(argv[i]);
+
+        if (!options_.contains(opt))
+            throw argument_exception(std::format("Undefined option {}", opt));
+
+        const std::string& key = options_.at(opt);
+        const argument& arg = arguments_.at(key);
+
+        if (arg.is_flag_) {
+            values_[key] = std::vector<std::string>();
+            continue;
+        }
+
+        if (++i >= argc)
+            throw argument_exception(std::format("Missing value for {}", opt));
+
+        std::string val(argv[i]);
+
+        if (!values_.contains(key)) {
+            values_[key] = std::vector<std::string>();
+        }
+        values_[key].push_back(val);
+    }
 }
 
 bool argument_parser::has(const std::string& key) const
@@ -111,16 +116,34 @@ template <>
 std::string argument_parser::get(const std::string& key) const
 {
     if (!arguments_.contains(key))
-        throw argument_exception("Undefined argument key retrieval attempt");
+        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
 
     if (!has(key))
-        throw argument_exception("Retrieval of not provided argument value");
+        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
 
     const auto& val = values_.at(key);
-    if (val)
-        return *val;
-    
-    throw argument_exception("Argument has no raw string value");
+    if (val.size() < 1)
+        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
+    if (val.size() > 1)
+        throw argument_exception(std::format("Retrieval of singular argument \"{}\" value that has more values", key));
+
+    return val[0];
+}
+
+template <>
+std::vector<std::string> argument_parser::get(const std::string& key) const
+{
+    if (!arguments_.contains(key))
+        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
+
+    if (!has(key))
+        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
+
+    const auto& val = values_.at(key);
+    if (val.size() < 1)
+        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
+
+    return val;
 }
 
 template <>
@@ -153,11 +176,7 @@ void argument_parser::print_help_usage() const
             str = std::format("{} {}", str, helper::to_upper(key));
         }
 
-        if (arg.is_mandatory_) {
-            opts += std::format(" {} ", str);
-        } else {
-            opts += std::format("[{}]", str);
-        }
+        opts += std::format("[{}]", str);
     }
 
     std::cout << std::format("Usage: {} {}", binary_name_, opts) << std::endl;
