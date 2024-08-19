@@ -9,10 +9,9 @@ int main(int argc, char* argv[])
 
     {
         using vgraph::utils::argument;
-        using vgraph::utils::EArgType;
         parser.add_argument("help", argument().option("-h").option("--help").flag().description("Print this help message"));
         parser.add_argument("debug", argument().option("-d").option("--debug").flag().description("Enable debug logs"));
-        parser.add_argument("telemetry", argument().option("-t").option("--telemetry").mandatory().argtype(EArgType::String).description("Telemetry file path"));
+        parser.add_argument("telemetry", argument().option("-t").option("--telemetry").mandatory().description("Telemetry file path"));
     }
 
     parser.print_help();

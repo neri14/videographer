@@ -47,7 +47,6 @@ argument& argument::flag()
         throw argument_exception("Mandatory argument set as flag");
 
     is_flag_ = true;
-    argtype_ = EArgType::Bool;
     return *this;
 }
 
@@ -63,15 +62,6 @@ argument& argument::mandatory()
 argument& argument::max_count(int max) 
 {
     max_count_ = max;
-    return *this;
-};
-
-argument& argument::argtype(EArgType t)
-{
-    if (is_flag_ && EArgType::Bool != t)
-        throw argument_exception("Setting flag type to non bool");
-
-    argtype_ = t;
     return *this;
 };
 
@@ -102,6 +92,38 @@ void argument_parser::add_argument(const std::string& key, const argument& arg)
 
     for (const std::string& opt : arg.options_)
         options_[opt] = key;
+}
+
+void argument_parser::parse(int argc, char* argv[])
+{
+    //TODO to be implemented: void argument_parser::parse(int argc, char* argv[])
+}
+
+bool argument_parser::has(const std::string& key) const
+{
+    return values_.contains(key);
+}
+
+template <>
+std::string argument_parser::get(const std::string& key) const
+{
+    if (!arguments_.contains(key))
+        throw argument_exception("Undefined argument key retrieval attempt");
+
+    if (!has(key))
+        throw argument_exception("Retrieval of not provided argument value");
+
+    const auto& val = values_.at(key);
+    if (val)
+        return *val;
+    
+    throw argument_exception("Argument has no raw string value");
+}
+
+template <>
+bool argument_parser::get(const std::string& key) const
+{
+    return has(key);
 }
 
 void argument_parser::print_help() const

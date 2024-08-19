@@ -13,23 +13,10 @@ class argument_parser_test: public ::testing::Test{
 };
 
 
-TEST_F(argument_parser_test, flag_type_is_bool)
-{
-    EXPECT_EQ(EArgType::Bool, argument().flag().argtype_);
-    EXPECT_NO_THROW(argument().flag().argtype(EArgType::Bool));
-    EXPECT_NO_THROW(argument().argtype(EArgType::Bool).flag());
-}
-
 TEST_F(argument_parser_test, creating_mandatory_flag_throws)
 {
     EXPECT_THROW(argument().flag().mandatory(), argument_exception);
     EXPECT_THROW(argument().mandatory().flag(), argument_exception);
-}
-
-TEST_F(argument_parser_test, creating_non_bool_flag_fails)
-{
-    EXPECT_THROW(argument().flag().argtype(EArgType::Int), argument_exception);
-    EXPECT_THROW(argument().flag().argtype(EArgType::String), argument_exception);
 }
 
 TEST_F(argument_parser_test, creating_argument_with_option_not_starting_with_dash_throws)
@@ -74,6 +61,8 @@ TEST_F(argument_parser_test, parsing_arguments)
     uut.add_argument("file", argument().option("-f").mandatory().description("file description"));
     uut.add_argument("optional", argument().option("-o").option("--optional").description("optional description"));
 }
+
+//TODO nok tests for getters without parsing implementation
 
 } // namespace utils
 } // namespace vgraph

@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <optional>
 
 namespace vgraph {
 namespace utils {
@@ -17,41 +18,19 @@ private:
     std::string msg_;
 };
 
-enum class EArgType {
-    String,
-    Int,
-    Bool
-};
-
 struct argument {
     argument& option(const std::string& opt);
     argument& flag();
     argument& mandatory();
     argument& max_count(int max);
-    argument& argtype(EArgType t);
     argument& description(const std::string& desc);
 
     std::vector<std::string> options_ = {};
     bool is_flag_ = false;
     bool is_mandatory_ = false;
     int max_count_ = 1;
-    EArgType argtype_ = EArgType::String;
     std::string description_ = "";
 };
-
-// class value {
-// public:
-//     value(const std::string& raw);
-//     value(bool val);
-
-//     bool get_bool();
-//     std::string get_string();
-//     int get_integer();
-
-// private:
-//     std::string raw_value;
-//     bool bool_value;
-// };
 
 class argument_parser {
 public:
@@ -61,7 +40,16 @@ public:
 
     void add_argument(const std::string& key, const argument& arg);
 
-    //TODO std::map<std::string, value> parse(int argc, char* argv[]);
+    void parse(int argc, char* argv[]);
+
+    bool has(const std::string& key) const;
+
+    template <typename T>
+    T get(const std::string& key) const
+    {
+        throw argument_exception("Unsupported argument type requested for {} argument", key);
+    }
+
     void print_help() const;
 
 private:
@@ -73,6 +61,8 @@ private:
     std::vector<std::string> keys_;
     std::map<std::string, argument> arguments_;
     std::map<std::string, std::string> options_;
+
+    std::map<std::string, std::optional<std::string>> values_;
 };
 
 } // namespace utils
