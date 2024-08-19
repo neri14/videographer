@@ -2,6 +2,7 @@
 #define ARGUMENT_PARSER_H
 
 #include <string>
+#include <format>
 #include <vector>
 #include <map>
 #include <optional>
@@ -47,7 +48,7 @@ public:
     template <typename T>
     T get(const std::string& key) const
     {
-        throw argument_exception("Unsupported argument type requested for {} argument", key);
+        throw argument_exception(std::format("Unsupported argument type requested for {} argument", key));
     }
 
     void print_help() const;

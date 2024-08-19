@@ -101,6 +101,9 @@ void argument_parser::parse(int argc, char* argv[])
 
 bool argument_parser::has(const std::string& key) const
 {
+    if (!arguments_.contains(key))
+        throw argument_exception("Undefined argument key retrieval attempt");
+
     return values_.contains(key);
 }
 
