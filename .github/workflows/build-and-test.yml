@@ -33,6 +33,10 @@ jobs:
     - name: Build binary
       run: cmake --build ${{github.workspace}}/build --target vgraph
 
+    - name: Binary can be started
+      working-directory: ${{github.workspace}}/build
+      run: ./vgraph -h
+
     - name: Build unit tests
       run: cmake --build ${{github.workspace}}/build --target vgraph_test
 
