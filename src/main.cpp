@@ -1,6 +1,5 @@
 #include <iostream>
 
-// #include "utils/args.h"
 #include "utils/argument_parser.h"
 
 int main(int argc, char* argv[])
@@ -14,19 +13,12 @@ int main(int argc, char* argv[])
         parser.add_argument("telemetry", argument().option("-t").option("--telemetry").description("Telemetry file path"));
     }
 
-    parser.print_help();
+    parser.parse(argc, argv);
 
-    // vgraph::utils::args a = vgraph::utils::args::parse(argc, argv);
-
-    // if (a.help) {
-    //     vgraph::utils::args::print_help();
-    //     return 0;
-    // }
-
-    // if (a.debug)
-    //     std::cout << "DEBUG" << std::endl;
-    // else
-    //     std::cout << "NO DEBUG" << std::endl;
+    if (parser.get<bool>("help")) {
+        parser.print_help();
+        return 0;
+    }
 
     return 0;
 }
