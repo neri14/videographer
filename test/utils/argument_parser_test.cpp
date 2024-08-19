@@ -84,15 +84,21 @@ TEST_F(argument_parser_test, argument_without_options_throws)
     EXPECT_THROW(uut.add_argument("test", argument()), argument_exception);
 }
 
+/* PARSING AND GETTING VALUES */
+
 TEST_F(argument_parser_test, parsing_arguments)
 {
     argument_parser uut("binary");
-    uut.add_argument("help", argument().option("-h").option("--help").flag().description("help description"));
+    uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
+    uut.add_argument("verbose", argument().option("-v").option("--verbose").flag().description("verbose description"));
     uut.add_argument("file", argument().option("-f").description("file description"));
-    uut.add_argument("optional", argument().option("-o").option("--optional").description("optional description"));
-}
 
-/* PARSING AND GETTING VALUES */
+    create_args({"-d", "-f", "somefile", "-v"});
+    uut.parse(argc, argv);
+
+    auto args = uut.get_raw();
+    EXPECT_EQ(3, args.size());
+}
 
 TEST_F(argument_parser_test, string_value_parsing)
 {
@@ -119,6 +125,8 @@ TEST_F(argument_parser_test, multiple_string_values_parsing)
     uut.parse(argc, argv);
 
     EXPECT_TRUE(uut.has("file"));
+    EXPECT_EQ(2, uut.count("file"));
+
     EXPECT_TRUE(uut.get<bool>("file"));
     EXPECT_THROW(uut.get<std::string>("file"), argument_exception);
 

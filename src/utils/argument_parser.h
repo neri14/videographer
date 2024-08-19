@@ -7,6 +7,8 @@
 #include <map>
 #include <optional>
 
+#include "logging/logger.h"
+
 namespace vgraph {
 namespace utils {
 
@@ -33,19 +35,22 @@ class argument_parser {
 public:
     argument_parser(const std::string binary_name);
     ~argument_parser() = default;
-    argument_parser(const argument_parser&) = delete;
+    argument_parser(const argument_parser&) = default;
 
     void add_argument(const std::string& key, const argument& arg);
 
     void parse(int argc, char* argv[]);
 
     bool has(const std::string& key) const;
+    int count(const std::string& key) const;
 
     template <typename T>
     T get(const std::string& key) const
     {
         throw argument_exception(std::format("Unsupported argument type requested for {} argument", key));
     }
+
+    std::map<std::string, std::vector<std::string>> get_raw() const;
 
     void print_help() const;
 
