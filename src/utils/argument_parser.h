@@ -36,6 +36,9 @@ public:
     argument_parser(const std::string binary_name);
     ~argument_parser() = default;
     argument_parser(const argument_parser&) = default;
+    argument_parser(argument_parser&&) = default;
+    argument_parser& operator=(const argument_parser&) = default;
+    argument_parser& operator=(argument_parser&&) = default;
 
     void add_argument(const std::string& key, const argument& arg);
 

@@ -33,9 +33,17 @@ const void backend::log(const std::string& logger_name, ELogLevel level, const s
     }
 }
 
-void backend::add_sink(ELogLevel level, std::shared_ptr<sink> sink)
+void backend::add_sink(std::shared_ptr<sink> sink, ELogLevel level)
 {
     sinks_.push_back(std::make_pair(level, sink));
+}
+
+void backend::set_log_level(std::shared_ptr<sink> sink, ELogLevel level)
+{
+    std::for_each(sinks_.begin(), sinks_.end(), [sink, level](auto& s) {
+        if (s.second == sink)
+            s.first = level;
+    });
 }
 
 void backend::remove_sink(std::shared_ptr<sink> sink)

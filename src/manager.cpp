@@ -1,0 +1,29 @@
+#include "manager.h"
+
+#include "utils/logging/backend.h"
+#include "utils/logging/stream_sink.h"
+
+#include <iostream>
+
+namespace vgraph {
+
+void manager::init(int argc, char* argv[])
+{
+    enable_logging();
+
+    args = arguments::parse(argc, argv);
+    set_log_level(args.debug ? utils::logging::ELogLevel::Debug : utils::logging::ELogLevel::Info);
+}
+
+void manager::enable_logging()
+{
+    log_sink = std::make_shared<utils::logging::stream_sink>(std::cout);
+    utils::logging::backend::get_instance().add_sink(log_sink);
+}
+
+void manager::set_log_level(utils::logging::ELogLevel level)
+{
+    utils::logging::backend::get_instance().set_log_level(log_sink, level);
+}
+
+} // namespace vgraph
