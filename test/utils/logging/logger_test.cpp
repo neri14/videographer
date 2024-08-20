@@ -58,7 +58,7 @@ protected:
 /* test simple logs */
 TEST_F(logger_test, debug_sink_receives_all_logs)
 {
-    backend::get_instance().add_sink(ELogLevel::Debug, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Debug);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg);
@@ -82,7 +82,7 @@ TEST_F(logger_test, debug_sink_receives_all_logs)
 
 TEST_F(logger_test, info_sink_receives_info_warning_error_logs_only)
 {
-    backend::get_instance().add_sink(ELogLevel::Info, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Info);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg);
@@ -106,7 +106,7 @@ TEST_F(logger_test, info_sink_receives_info_warning_error_logs_only)
 
 TEST_F(logger_test, warning_sink_receives_warning_error_logs_only)
 {
-    backend::get_instance().add_sink(ELogLevel::Warning, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Warning);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg);
@@ -130,7 +130,7 @@ TEST_F(logger_test, warning_sink_receives_warning_error_logs_only)
 
 TEST_F(logger_test, error_sink_receives_error_logs_only)
 {
-    backend::get_instance().add_sink(ELogLevel::Error, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Error);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg);
@@ -155,7 +155,7 @@ TEST_F(logger_test, error_sink_receives_error_logs_only)
 /* test logs with arguments */
 TEST_F(logger_test, debug_sink_receives_all_logs_with_args)
 {
-    backend::get_instance().add_sink(ELogLevel::Debug, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Debug);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg_with_args, consts::log_arg1, consts::log_arg2, consts::log_arg3);
@@ -179,7 +179,7 @@ TEST_F(logger_test, debug_sink_receives_all_logs_with_args)
 
 TEST_F(logger_test, info_sink_receives_info_warning_error_logs_only_with_args)
 {
-    backend::get_instance().add_sink(ELogLevel::Info, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Info);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg_with_args, consts::log_arg1, consts::log_arg2, consts::log_arg3);
@@ -203,7 +203,7 @@ TEST_F(logger_test, info_sink_receives_info_warning_error_logs_only_with_args)
 
 TEST_F(logger_test, warning_sink_receives_warning_error_logs_only_with_args)
 {
-    backend::get_instance().add_sink(ELogLevel::Warning, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Warning);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg_with_args, consts::log_arg1, consts::log_arg2, consts::log_arg3);
@@ -227,7 +227,7 @@ TEST_F(logger_test, warning_sink_receives_warning_error_logs_only_with_args)
 
 TEST_F(logger_test, error_sink_receives_error_logs_only_with_args)
 {
-    backend::get_instance().add_sink(ELogLevel::Error, sink);
+    backend::get_instance().add_sink(sink, ELogLevel::Error);
     logger uut(consts::logger_name);
 
     uut.debug(consts::log_msg_with_args, consts::log_arg1, consts::log_arg2, consts::log_arg3);
@@ -248,6 +248,8 @@ TEST_F(logger_test, error_sink_receives_error_logs_only_with_args)
     uut.error(consts::log_msg_with_args, consts::log_arg1, consts::log_arg2, consts::log_arg3);
     ASSERT_EQ(consts::expected_error_args, sink_stream.str());
 }
+
+//FIXME tests for set_log_level
 
 } // namespace logging
 } // namespace utils

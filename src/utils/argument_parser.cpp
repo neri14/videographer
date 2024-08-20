@@ -18,11 +18,11 @@ std::string to_upper(std::string str)
 } // namespace helper
 
 argument_exception::argument_exception(
-    const std::string& msg): msg_(msg) {}
+    const std::string& msg): msg_(std::format("Argument exception: {}", msg)) {}
 
 const char* argument_exception::what() const noexcept
 {
-    return std::format("Argument exception: {}", msg_).c_str();
+    return msg_.c_str();
 }
 
 argument& argument::option(const std::string& opt)
@@ -112,6 +112,14 @@ bool argument_parser::has(const std::string& key) const
     return values_.contains(key);
 }
 
+int argument_parser::count(const std::string& key) const
+{
+    if (!has(key))
+        return 0;
+
+    return values_.at(key).size();
+}
+
 template <>
 std::string argument_parser::get(const std::string& key) const
 {
@@ -144,6 +152,11 @@ std::vector<std::string> argument_parser::get(const std::string& key) const
         throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
 
     return val;
+}
+
+std::map<std::string, std::vector<std::string>> argument_parser::get_raw() const
+{
+    return values_;
 }
 
 template <>
