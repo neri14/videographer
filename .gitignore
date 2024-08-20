@@ -9,3 +9,8 @@ build
 *.a
 vgraph
 vgraph_test
+
+#python tools
+venv
+*.mp4
+*.mp3
