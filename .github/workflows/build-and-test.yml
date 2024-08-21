@@ -37,7 +37,14 @@ jobs:
         cd /usr/src/gtest
         sudo mkdir build && cd build
         sudo cmake ..
-        sudo make install
+        sudo make
+        sudo cp libgtest* /usr/lib/
+        sudo cp libgmock* /usr/lib/
+        sudo mkdir /usr/local/lib/googletest
+        sudo ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a
+        sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
+        sudo ln -s /usr/lib/libgmock.a /usr/local/lib/googletest/libgmock.a
+        sudo ln -s /usr/lib/libgmock_main.a /usr/local/lib/googletest/libgmock_main.a
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build
