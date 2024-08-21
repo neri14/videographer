@@ -24,7 +24,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libgtest-dev
 
-
     - name: Print env
       run: |
         echo github.event.action: ${{ github.event.action }}
@@ -32,6 +31,13 @@ jobs:
         cmake --version
         $CC --version
         $CXX --version
+
+    - name: Build gtest
+      run: |
+        cd /usr/src/gtest
+        sudo mkdir build && cd build
+        sudo cmake ..
+        sudo make install
 
     - name: Configure CMake
       run: cmake -B ${{github.workspace}}/build
