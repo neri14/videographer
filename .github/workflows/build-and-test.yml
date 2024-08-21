@@ -19,6 +19,12 @@ jobs:
       with:
         submodules: recursive
 
+    - name: Install dependencies
+      run: |
+        apt update
+        apt install -y libgtest-dev
+
+
     - name: Print env
       run: |
         echo github.event.action: ${{ github.event.action }}
