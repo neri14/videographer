@@ -22,7 +22,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install -y libgtest-dev
+        sudo apt-get install -y libgmock-dev
 
     - name: Print env
       run: |
@@ -38,8 +38,10 @@ jobs:
         sudo mkdir build && cd build
         sudo cmake ..
         sudo make
-        sudo cp libgtest* /usr/lib/
-        sudo cp libgmock* /usr/lib/
+        ls
+        ls lib
+        sudo cp lib/libgtest* /usr/lib/
+        sudo cp lib/libgmock* /usr/lib/
         sudo mkdir /usr/local/lib/googletest
         sudo ln -s /usr/lib/libgtest.a /usr/local/lib/googletest/libgtest.a
         sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/googletest/libgtest_main.a
