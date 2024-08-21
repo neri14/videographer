@@ -3,6 +3,14 @@
 [![Build and Test](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml)
 
 
+## Building and testing
+
+1. ```cmake -B build``` generate cmake files to build directory
+1. ```cmake --build build --target vgraph``` build main binary
+1. ```cmake --build build --target vgraph_test``` build unit tests
+1. ```build/vgraph_test``` run unit tests
+
+
 ## Alignment Tool
 
 Python alignment tool is located in tools/alignment.
