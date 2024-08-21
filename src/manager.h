@@ -13,6 +13,8 @@ public:
     manager() = default;
     void init(int argc, char* argv[]);
 
+    void run();
+
 private:
     void enable_logging();
     void set_log_level(utils::logging::ELogLevel level);

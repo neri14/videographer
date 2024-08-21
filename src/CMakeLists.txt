@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.20.0)
 
-target_sources(vgraph
+target_sources(vgraph_lib
     PRIVATE
-        main.cpp
         arguments.cpp
         manager.cpp
     PUBLIC
@@ -10,5 +9,11 @@ target_sources(vgraph
         manager.h
 )
 
+target_sources(vgraph
+    PRIVATE
+        main.cpp
+)
+
 add_subdirectory(telemetry)
 add_subdirectory(utils)
+add_subdirectory(video)

@@ -3,6 +3,17 @@
 [![Build and Test](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml)
 
 
+## Dependencies
+
+Packages required in system to build the application
+
+- CMake >= 3.23
+- Make / Ninja
+- GCC >= 14.x
+- googlemock
+- gstreamer >= 1.24
+
+
 ## Alignment Tool
 
 Python alignment tool is located in tools/alignment.
