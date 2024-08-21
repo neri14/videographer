@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20.0)
+cmake_minimum_required(VERSION 3.23.0)
 project(VideoGrapher LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 23)
@@ -27,8 +27,8 @@ target_link_libraries(vgraph PRIVATE vgraph_lib garmin)
 # define test executable
 add_executable(vgraph_test)
 
-# add google test library directory
-add_subdirectory(3rdparty/googletest)
+# find googletest
+find_package(GTest REQUIRED)
 
 # add test source files
 add_subdirectory(test)
