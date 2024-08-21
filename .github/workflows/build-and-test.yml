@@ -34,7 +34,7 @@ jobs:
 
     - name: Build gtest
       run: |
-        cd /usr/src/gtest
+        cd /usr/src/gmock
         sudo mkdir build && cd build
         sudo cmake ..
         sudo make
