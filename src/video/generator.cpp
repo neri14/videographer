@@ -8,7 +8,7 @@ extern "C" {
 namespace vgraph {
 namespace video {
 
-generator::generator(const std::string& input, const std::string& output, const overlay_drawer& overlay):
+generator::generator(const std::string& input, const std::string& output, overlay::overlay& overlay):
     input_path_(input),
     output_path_(output),
     overlay_(overlay)

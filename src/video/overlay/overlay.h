@@ -9,18 +9,23 @@ extern "C" {
 
 namespace vgraph {
 namespace video {
+namespace overlay {
 
-class overlay_drawer {
+class overlay {
 public:
-    overlay_drawer() = default;
-    ~overlay_drawer() = default;
+    overlay() = default;
+    ~overlay();
 
-    void draw(cairo_t* cr, double timestamp) const;
+    void draw(cairo_t* cr, double timestamp);
 
 private:
     utils::logging::logger log{"overlay"};
+
+    long total_drawing_time = 0;
+    int total_drawn_frames = 0;
 };
 
+} // namespace overlay
 } // namespace video
 } // namespace vgraph
 

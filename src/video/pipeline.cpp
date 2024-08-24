@@ -53,7 +53,7 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay_drawer* ptr)
+    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay::overlay* ptr)
     {
         long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
         static long first_raw_stamp = raw_stamp;
@@ -64,7 +64,7 @@ namespace helper {
 }
 
 
-pipeline::pipeline(const std::string& input_path, const std::string& output_path, const overlay_drawer& overlay):
+pipeline::pipeline(const std::string& input_path, const std::string& output_path, overlay::overlay& overlay):
     input_path_(input_path),
     output_path_(output_path),
     overlay_(overlay)
@@ -166,7 +166,7 @@ bool pipeline::init()
 
     log.debug("Connect callback to 'pad-added' signal of '{}' element", elem::name::decode);
     g_signal_connect(elements_[elem::name::decode], "pad-added", G_CALLBACK(helper::pad_added_cb), this);
-    g_signal_connect (elements_[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), const_cast<overlay_drawer*>(&overlay_));
+    g_signal_connect (elements_[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), const_cast<overlay::overlay*>(&overlay_));
 
     return true;
 }
