@@ -23,7 +23,7 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libgmock-dev
-        sudo apt-get install -y gstreamer1.0 gst-plugins-base1.0 gst-plugins-bad1.0 gst-plugins-ugly1.0
+        sudo apt-get install -y gstreamer1.0 gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-plugins-ugly
         sudo apt-get install -y libcairo-dev pango1.0
 
     - name: Print env
