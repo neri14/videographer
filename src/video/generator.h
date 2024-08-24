@@ -11,7 +11,7 @@ namespace video {
 
 class generator {
 public:
-    generator(const std::vector<std::string>& input, const std::string& output);
+    generator(const std::string& input, const std::string& output);
     ~generator() = default;
 
     void generate();
@@ -19,8 +19,8 @@ public:
 private:
     utils::logging::logger log{"generator"};
 
-    std::vector<std::string> input_;
-    std::string output_;
+    std::string input_path_;
+    std::string output_path_;
 };
 
 }

@@ -3,9 +3,9 @@
 namespace vgraph {
 namespace video {
 
-generator::generator(const std::vector<std::string>& input, const std::string& output):
-    input_(input),
-    output_(output)
+generator::generator(const std::string& input, const std::string& output):
+    input_path_(input),
+    output_path_(output)
 {}
 
 void generator::generate()
