@@ -22,11 +22,13 @@ add_subdirectory(3rdparty/garmin_fit_sdk)
 find_package(PkgConfig REQUIRED)
 pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
 pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
+pkg_search_module(Cairo REQUIRED IMPORTED_TARGET cairo)
 
 # link libraries to vgraph_lib
 target_link_libraries(vgraph_lib PRIVATE
                       PkgConfig::gstreamer
                       PkgConfig::gstreamer-video
+                      PkgConfig::Cairo
                       garmin
                       )
 

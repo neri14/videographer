@@ -9,6 +9,8 @@
 extern "C" {
     #include <gst/gst.h>
     #include <gst/video/video.h>
+
+    #include <cairo.h>
 }
 
 namespace vgraph {
@@ -26,7 +28,7 @@ public:
 
     //FIXME to check if can be reworked and privatized
     void pad_added_handler(GstElement* src, GstPad* new_pad);
-    GstVideoOverlayComposition* draw_overlay(GstElement * overlay, GstSample * sample);
+    void draw_overlay(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration);
 
 private:
     bool link_elements(const std::string& src, const std::string& dest, GstCaps* filter = nullptr);

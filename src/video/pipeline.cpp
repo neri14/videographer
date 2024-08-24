@@ -23,6 +23,7 @@ namespace elem {
         const std::string& video_convert("video_convert");
         const std::string& video_rotate("video_rotate");
         const std::string& video_overlay("video_overlay");
+        const std::string& video_convert2("video_convert2");
         const std::string& video_encode("video_encode");
 
         // output
@@ -38,7 +39,8 @@ namespace elem {
         {name::audio_encode,     "avenc_aac"},
         {name::video_convert,    "videoconvert"},
         {name::video_rotate,     "videoflip"},
-        {name::video_overlay,    "overlaycomposition"},
+        {name::video_overlay,    "cairooverlay"},
+        {name::video_convert2,   "videoconvert"},
         {name::video_encode,     "x264enc"},
         {name::mux,              "mp4mux"},
         {name::sink,             "filesink"}
@@ -51,9 +53,9 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    GstVideoOverlayComposition* draw_overlay_cb(GstElement * overlay, GstSample * sample, pipeline* ptr)
+    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, pipeline* ptr)
     {
-        return ptr->draw_overlay(overlay, sample);
+        return ptr->draw_overlay(overlay, cr, timestamp, duration);
     }
 }
 
@@ -125,11 +127,12 @@ bool pipeline::link()
     ok = link_elements(elem::name::audio_resample, elem::name::audio_encode) && ok;
     ok = link_elements(elem::name::audio_encode, elem::name::mux) && ok;
 
-    //link video: video_convert -> video_rotate -> video_overlay -> video_encode -> mux
+    //link video: video_convert -> video_rotate -> video_overlay -> video_convert2 -> video_encode -> mux
     log.debug("Linking video path");
     ok = link_elements(elem::name::video_convert, elem::name::video_rotate) && ok;
     ok = link_elements(elem::name::video_rotate, elem::name::video_overlay) && ok;
-    ok = link_elements(elem::name::video_overlay, elem::name::video_encode) && ok;
+    ok = link_elements(elem::name::video_overlay, elem::name::video_convert2) && ok;
+    ok = link_elements(elem::name::video_convert2, elem::name::video_encode) && ok;
 
     GstCaps* filter = gst_caps_new_simple("video/x-h264",
                                           "profile", G_TYPE_STRING, consts::h264_profile.c_str(),
@@ -158,7 +161,7 @@ bool pipeline::init()
 
     log.debug("Connect callback to 'pad-added' signal of '{}' element", elem::name::decode);
     g_signal_connect(elements[elem::name::decode], "pad-added", G_CALLBACK(helper::pad_added_cb), this);
-    g_signal_connect (elements[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_overlay_cb), this);
+    g_signal_connect (elements[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), this);
 
     return true;
 }
@@ -293,15 +296,26 @@ void pipeline::pad_added_handler(GstElement* src, GstPad* new_pad)
         gst_caps_unref(new_pad_caps);
 }
 
-GstVideoOverlayComposition* pipeline::draw_overlay(GstElement * overlay, GstSample * sample)
+void pipeline::draw_overlay(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration)
 {
-    long int raw_frame_stamp = GST_TIME_AS_USECONDS(GST_BUFFER_PTS(gst_sample_get_buffer(sample)));
-    static long int raw_offset = raw_frame_stamp; //FIXME tbd
-    double frame_stamp = (raw_frame_stamp - raw_offset) / 1000000.0;
+    long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
+    static long first_raw_stamp = raw_stamp;
+    double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
 
-    //TODO not yet implemented
+    long st = raw_stamp - first_raw_stamp;
+    int us = st;
+    int s = us/1000000;
+    int m = s/60;
+    int h = m/60;
 
-    return gst_video_overlay_composition_new(nullptr);
+    m = m-h*60;
+    s = s-m*60;
+    us = us - s*1000000;
+
+    cairo_scale (cr, 4, 4);
+    cairo_move_to(cr, 250, 25);
+    cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1);
+    cairo_show_text(cr, std::format("{:02d}:{:02d}:{:02d}.{:06d}",h,m,s,us).c_str());
 }
 
 } // namespace video

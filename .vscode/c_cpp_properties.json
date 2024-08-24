@@ -7,7 +7,8 @@
                 "${workspaceFolder}/test",
                 "/usr/include/gstreamer-1.0",
                 "/usr/include/glib-2.0",
-                "/usr/lib/glib-2.0/include"
+                "/usr/lib/glib-2.0/include",
+                "/usr/include/cairo"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/clang",
