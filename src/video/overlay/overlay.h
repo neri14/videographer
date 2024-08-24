@@ -2,7 +2,7 @@
 #define OVERLAY_H
 
 #include "utils/logging/logger.h"
-#include "widget.h"
+#include "widget/widget.h"
 #include <memory>
 
 extern "C" {

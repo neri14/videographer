@@ -1,6 +1,6 @@
 #include "overlay.h"
 
-#include "string_widget.h"
+#include "widget/string_widget.h"
 
 #include <format>
 #include <chrono>
