@@ -18,8 +18,18 @@ target_include_directories(vgraph_lib PUBLIC src)
 # add garmin sdk library directory
 add_subdirectory(3rdparty/garmin_fit_sdk)
 
+# find gstreamer libraries
+find_package(PkgConfig REQUIRED)
+pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
+pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
+
 # link libraries to executable
-target_link_libraries(vgraph PRIVATE vgraph_lib garmin)
+target_link_libraries(vgraph PRIVATE
+                      vgraph_lib
+                      garmin
+                      PkgConfig::gstreamer
+                      PkgConfig::gstreamer-video
+                      )
 
 
 ## TESTING
