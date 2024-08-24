@@ -23,12 +23,16 @@ find_package(PkgConfig REQUIRED)
 pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
 pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
 
-# link libraries to executable
-target_link_libraries(vgraph PRIVATE
-                      vgraph_lib
-                      garmin
+# link libraries to vgraph_lib
+target_link_libraries(vgraph_lib PRIVATE
                       PkgConfig::gstreamer
                       PkgConfig::gstreamer-video
+                      garmin
+                      )
+
+# link vgraph_lib to vgraph executable
+target_link_libraries(vgraph PRIVATE
+                      vgraph_lib
                       )
 
 

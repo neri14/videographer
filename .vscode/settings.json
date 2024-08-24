@@ -87,6 +87,9 @@
         "regex": "cpp",
         "source_location": "cpp",
         "shared_mutex": "cpp",
-        "typeindex": "cpp"
+        "typeindex": "cpp",
+        "util": "cpp",
+        "export": "cpp",
+        "assert": "cpp"
     }
 }
