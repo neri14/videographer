@@ -3,6 +3,8 @@
 
 #include "utils/logging/logger.h"
 
+#include "overlay_drawer.h"
+
 #include <string>
 #include <vector>
 
@@ -11,7 +13,7 @@ namespace video {
 
 class generator {
 public:
-    generator(const std::string& input, const std::string& output);
+    generator(const std::string& input, const std::string& output, const overlay_drawer& overlay);
     ~generator() = default;
 
     void generate();
@@ -21,6 +23,8 @@ private:
 
     std::string input_path_;
     std::string output_path_;
+
+    const overlay_drawer& overlay_;
 };
 
 }

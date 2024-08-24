@@ -3,6 +3,8 @@
 
 #include "utils/logging/logger.h"
 
+#include "overlay_drawer.h"
+
 #include <map>
 #include <string>
 
@@ -18,7 +20,7 @@ namespace video {
 
 class pipeline {
 public:
-    pipeline(const std::string& input_path, const std::string& output_path);
+    pipeline(const std::string& input_path, const std::string& output_path, const overlay_drawer& overlay);
     ~pipeline();
 
     bool build();
@@ -34,7 +36,9 @@ private:
     bool link_elements(const std::string& src, const std::string& dest, GstCaps* filter = nullptr);
 
     utils::logging::logger log{"pipeline"};
-    std::map<std::string, GstElement*> elements;
+
+    const overlay_drawer& overlay_;
+    std::map<std::string, GstElement*> elements_;
     std::string input_path_;
     std::string output_path_;
 };

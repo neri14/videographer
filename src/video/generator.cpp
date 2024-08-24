@@ -8,9 +8,10 @@ extern "C" {
 namespace vgraph {
 namespace video {
 
-generator::generator(const std::string& input, const std::string& output):
+generator::generator(const std::string& input, const std::string& output, const overlay_drawer& overlay):
     input_path_(input),
-    output_path_(output)
+    output_path_(output),
+    overlay_(overlay)
 {}
 
 void generator::generate()
@@ -21,7 +22,7 @@ void generator::generate()
     gst_init(nullptr, nullptr);
 
     log.info("Creating pipeline");
-    pipeline pipe(input_path_, output_path_);
+    pipeline pipe(input_path_, output_path_, overlay_);
 
     if (!pipe.build()) {
         log.error("Pipeline creation failed");

@@ -53,33 +53,38 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, pipeline* ptr)
+    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay_drawer* ptr)
     {
-        return ptr->draw_overlay(overlay, cr, timestamp, duration);
+        long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
+        static long first_raw_stamp = raw_stamp;
+        double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
+
+        ptr->draw(cr, stamp);
     }
 }
 
 
-pipeline::pipeline(const std::string& input_path, const std::string& output_path):
+pipeline::pipeline(const std::string& input_path, const std::string& output_path, const overlay_drawer& overlay):
     input_path_(input_path),
-    output_path_(output_path)
+    output_path_(output_path),
+    overlay_(overlay)
 {}
 
 pipeline::~pipeline()
 {
     log.info("Tearing down pipeline");
 
-    if (elements.contains(elem::name::pipeline) && elements.at(elem::name::pipeline) != nullptr) {
-        GstElement* pipeline_ = elements.at(elem::name::pipeline);
+    if (elements_.contains(elem::name::pipeline) && elements_.at(elem::name::pipeline) != nullptr) {
+        GstElement* pipeline_ = elements_.at(elem::name::pipeline);
         gst_element_set_state(pipeline_, GST_STATE_NULL);
         gst_object_unref(pipeline_);
     }
-    elements.clear();
+    elements_.clear();
 }
 
 bool pipeline::build()
 {
-    log.info("Creating pipeline elements");
+    log.info("Creating pipeline elements_");
 
     log.debug("Creating pipeline bin");
     GstElement* pipeline_ptr = gst_pipeline_new(elem::name::pipeline.c_str());
@@ -87,7 +92,7 @@ bool pipeline::build()
     bool ok = true;
     if (nullptr != pipeline_ptr) {
         log.debug("Created pipeline bin");
-        elements[elem::name::pipeline] = pipeline_ptr;
+        elements_[elem::name::pipeline] = pipeline_ptr;
     } else {
         log.error("Creating pipeline bin failed");
         ok = false;
@@ -101,7 +106,7 @@ bool pipeline::build()
 
         if (nullptr != ptr) {
             log.debug("Created {} pipeline element ({})", type, name);
-            elements[name] = ptr;
+            elements_[name] = ptr;
             gst_bin_add(bin, ptr);
         } else {
             log.error("Creating {} pipeline element ({}) failed", type, name);
@@ -114,7 +119,7 @@ bool pipeline::build()
 
 bool pipeline::link()
 {
-    log.info("Linking pipeline elements");
+    log.info("Linking pipeline elements_");
     bool ok = true;
 
     //link input: source -> decode
@@ -153,15 +158,15 @@ bool pipeline::init()
 {
     log.info("Initializing pipeline");
 
-    log.debug("Pipeline elements basic config");
-    g_object_set(elements[elem::name::source], "location", input_path_.c_str(), nullptr);
-    g_object_set(elements[elem::name::sink], "location", output_path_.c_str(), nullptr);
-    g_object_set(elements[elem::name::video_rotate], "video-direction", GST_VIDEO_ORIENTATION_AUTO, nullptr);
-    g_object_set(elements[elem::name::video_encode], "bitrate", consts::output_bitrate, nullptr);
+    log.debug("Pipeline elements_ basic config");
+    g_object_set(elements_[elem::name::source], "location", input_path_.c_str(), nullptr);
+    g_object_set(elements_[elem::name::sink], "location", output_path_.c_str(), nullptr);
+    g_object_set(elements_[elem::name::video_rotate], "video-direction", GST_VIDEO_ORIENTATION_AUTO, nullptr);
+    g_object_set(elements_[elem::name::video_encode], "bitrate", consts::output_bitrate, nullptr);
 
     log.debug("Connect callback to 'pad-added' signal of '{}' element", elem::name::decode);
-    g_signal_connect(elements[elem::name::decode], "pad-added", G_CALLBACK(helper::pad_added_cb), this);
-    g_signal_connect (elements[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), this);
+    g_signal_connect(elements_[elem::name::decode], "pad-added", G_CALLBACK(helper::pad_added_cb), this);
+    g_signal_connect (elements_[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), const_cast<overlay_drawer*>(&overlay_));
 
     return true;
 }
@@ -171,7 +176,7 @@ bool pipeline::run()
     log.info("Starting the pipeline execution");
 
     log.debug("Setting pipeline state to PLAYING");
-    GstStateChangeReturn ret = gst_element_set_state(elements[elem::name::pipeline], GST_STATE_PLAYING);
+    GstStateChangeReturn ret = gst_element_set_state(elements_[elem::name::pipeline], GST_STATE_PLAYING);
 
     if (GST_STATE_CHANGE_FAILURE == ret) {
         log.error("Pipeline state change has failed (target state: PLAYING)");
@@ -179,7 +184,7 @@ bool pipeline::run()
     }
 
     // listen to the bus
-    GstBus *bus = gst_element_get_bus(elements[elem::name::pipeline]);
+    GstBus *bus = gst_element_get_bus(elements_[elem::name::pipeline]);
     GstMessage *msg;
 
     bool terminate = false;
@@ -209,7 +214,7 @@ bool pipeline::run()
                     break;
                 case GST_MESSAGE_STATE_CHANGED:
                     // handle only if msg comes from pipeline
-                    if (GST_MESSAGE_SRC(msg) == GST_OBJECT(elements[elem::name::pipeline])) {
+                    if (GST_MESSAGE_SRC(msg) == GST_OBJECT(elements_[elem::name::pipeline])) {
                         GstState old_state, new_state, pending_state;
                         gst_message_parse_state_changed(msg, &old_state, &new_state, &pending_state);
                         log.info("Pipeline state changed from {} to {}",
@@ -224,7 +229,7 @@ bool pipeline::run()
             gst_message_unref(msg);
         } else {
             //no message received during timeout - update time display
-            GstElement* ptr = elements[elem::name::pipeline];
+            GstElement* ptr = elements_[elem::name::pipeline];
 
             gint64 pos, len;
             if (gst_element_query_position(ptr, GST_FORMAT_TIME, &pos) && gst_element_query_duration(ptr, GST_FORMAT_TIME, &len)) {
@@ -245,9 +250,9 @@ bool pipeline::link_elements(const std::string& src, const std::string& dest, Gs
 
     bool ok = false;
     if (nullptr == filter) {
-        ok = gst_element_link(elements[src], elements[dest]);
+        ok = gst_element_link(elements_[src], elements_[dest]);
     } else {
-        ok = gst_element_link_filtered(elements[src], elements[dest], filter);
+        ok = gst_element_link_filtered(elements_[src], elements_[dest], filter);
     }
 
     if (!ok)
@@ -269,10 +274,10 @@ void pipeline::pad_added_handler(GstElement* src, GstPad* new_pad)
 
     if (new_pad_type.starts_with("video/x-raw")) {
         log.debug("Target pad is located in {} element", elem::name::video_convert);
-        target_pad = gst_element_get_static_pad(elements[elem::name::video_convert], "sink");
+        target_pad = gst_element_get_static_pad(elements_[elem::name::video_convert], "sink");
     } else if (new_pad_type.starts_with("audio/x-raw")) {
         log.debug("Target pad is located in {} element", elem::name::audio_convert);
-        target_pad = gst_element_get_static_pad(elements[elem::name::audio_convert], "sink");
+        target_pad = gst_element_get_static_pad(elements_[elem::name::audio_convert], "sink");
     } else {
         log.debug("Unsupported pad type - ignoring");
     }
@@ -294,28 +299,6 @@ void pipeline::pad_added_handler(GstElement* src, GstPad* new_pad)
 
     if (nullptr != new_pad_caps)
         gst_caps_unref(new_pad_caps);
-}
-
-void pipeline::draw_overlay(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration)
-{
-    long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
-    static long first_raw_stamp = raw_stamp;
-    double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
-
-    long st = raw_stamp - first_raw_stamp;
-    int us = st;
-    int s = us/1000000;
-    int m = s/60;
-    int h = m/60;
-
-    m = m-h*60;
-    s = s-m*60;
-    us = us - s*1000000;
-
-    cairo_scale (cr, 4, 4);
-    cairo_move_to(cr, 250, 25);
-    cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1);
-    cairo_show_text(cr, std::format("{:02d}:{:02d}:{:02d}.{:06d}",h,m,s,us).c_str());
 }
 
 } // namespace video

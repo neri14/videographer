@@ -4,6 +4,7 @@
 #include "utils/logging/stream_sink.h"
 
 #include "video/generator.h"
+#include "video/overlay_drawer.h"
 
 #include <iostream>
 
@@ -19,7 +20,8 @@ void manager::init(int argc, char* argv[])
 
 void manager::run()
 {
-    video::generator gen(args.input, args.output);
+    video::overlay_drawer overlay;
+    video::generator gen(args.input, args.output, overlay);
 
     gen.generate();
 }
