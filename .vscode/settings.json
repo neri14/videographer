@@ -83,6 +83,13 @@
         "valarray": "cpp",
         "variant": "cpp",
         "stdfloat": "cpp",
-        "span_ext": "cpp"
+        "span_ext": "cpp",
+        "regex": "cpp",
+        "source_location": "cpp",
+        "shared_mutex": "cpp",
+        "typeindex": "cpp",
+        "util": "cpp",
+        "export": "cpp",
+        "assert": "cpp"
     }
 }

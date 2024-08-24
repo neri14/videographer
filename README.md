@@ -2,6 +2,18 @@
 
 [![Build and Test](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml/badge.svg)](https://github.com/neri14/videographer/actions/workflows/build-and-test.yml)
 
+## Dependencies
+
+Packages required in system to build the application
+
+- CMake >= 3.23
+- Make / Ninja
+- GCC >= 14.x
+- googlemock
+- gstreamer >= 1.24
+- cairo
+- pango
+
 
 ## Building and testing
 
@@ -9,6 +21,16 @@
 1. ```cmake --build build --target vgraph``` build main binary
 1. ```cmake --build build --target vgraph_test``` build unit tests
 1. ```build/vgraph_test``` run unit tests
+
+
+## Pipeline
+
+1. Record the video
+1. Run concat tool to combine the video (TODO what about trimming?)
+1. Run alignment tool and figure out offset
+1. Run generator app to generate base video (most probably will be in 1080p)
+1. Run upscale tool so YT doesn't kill quality
+1. Upload
 
 
 ## Alignment Tool

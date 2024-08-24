@@ -3,6 +3,9 @@
 #include "utils/logging/backend.h"
 #include "utils/logging/stream_sink.h"
 
+#include "video/generator.h"
+#include "video/overlay/overlay.h"
+
 #include <iostream>
 
 namespace vgraph {
@@ -13,6 +16,14 @@ void manager::init(int argc, char* argv[])
 
     args = arguments::parse(argc, argv);
     set_log_level(args.debug ? utils::logging::ELogLevel::Debug : utils::logging::ELogLevel::Info);
+}
+
+void manager::run()
+{
+    video::overlay::overlay overlay;
+    video::generator gen(args.input, args.output, overlay);
+
+    gen.generate();
 }
 
 void manager::enable_logging()
