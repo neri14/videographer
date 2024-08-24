@@ -143,6 +143,9 @@ int main(int argc, char* argv[])
     // set source file
     g_object_set(data.source, "location", input_file.c_str(), NULL);
 
+    // set auto rotation
+    g_object_set(data.rotate, "video-direction", GST_VIDEO_ORIENTATION_AUTO, NULL);
+
     // set static text
     g_object_set(data.text, "text", "This is a test text overlay", NULL);
     g_object_set(data.text, "font-desc", "Monospace, 72", NULL);
@@ -165,13 +168,11 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    GstVideoOrientationMethod rotation = GST_VIDEO_ORIENTATION_IDENTITY;
-
     // listen to the bus
     bus = gst_element_get_bus(data.pipeline);
     do {
         msg = gst_bus_timed_pop_filtered(bus, 1000 * GST_MSECOND,
-            static_cast<GstMessageType>(GST_MESSAGE_STATE_CHANGED | GST_MESSAGE_ERROR | GST_MESSAGE_EOS | GST_MESSAGE_TAG));
+            static_cast<GstMessageType>(GST_MESSAGE_STATE_CHANGED | GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
         
         // parse message
         if (msg != NULL) {
@@ -199,23 +200,6 @@ int main(int argc, char* argv[])
                         std::cout << std::format("Pipeline state changed from {} to {}",
                             gst_element_state_get_name(old_state), gst_element_state_get_name(new_state)) << std::endl;
                     }
-                    break;
-                case GST_MESSAGE_TAG:
-                    GstTagList* tags;
-                    gst_message_parse_tag(msg, &tags);
-
-                    {
-                        GstVideoOrientationMethod new_rotation = GST_VIDEO_ORIENTATION_IDENTITY;
-                        if(gst_video_orientation_from_tag(tags, &new_rotation)) {
-                            if (new_rotation != rotation) {
-                                rotation = new_rotation;
-                                g_object_set(data.rotate, "video-direction", rotation, NULL);
-                                std::cout << "rotation: " << static_cast<int>(rotation) << std::endl;
-                                //FIXME one of elements is stripping tags - autorotation doesn't work anymore
-                            }
-                        }
-                    }
-                    gst_tag_list_unref(tags);
                     break;
                 default:
                     //shouldn't reach as we didn't register for any other message type
