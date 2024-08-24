@@ -14,6 +14,16 @@ Packages required in system to build the application
 - gstreamer >= 1.24
 
 
+## Pipeline
+
+1. Record the video
+1. Run concat tool to combine the video (TODO what about trimming?)
+1. Run alignment tool and figure out offset
+1. Run generator app to generate base video (most probably will be in 1080p)
+1. Run upscale tool so YT doesn't kill quality
+1. Upload
+
+
 ## Alignment Tool
 
 Python alignment tool is located in tools/alignment.
