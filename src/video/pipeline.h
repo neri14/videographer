@@ -23,7 +23,7 @@ public:
     bool init();
     bool run();
 
-    //FIXME to check if canbe reworked and privatized
+    //FIXME to check if can be reworked and privatized
     void pad_added_handler(GstElement* src, GstPad* new_pad);
 
 private:

@@ -29,7 +29,7 @@ void generator::generate()
     }
     
     if (!pipe.link()) {
-        log.error("Pipeline static linking failed");
+        log.error("Pipeline static elements linking failed");
         return;
     }
 
