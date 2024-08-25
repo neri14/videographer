@@ -4,7 +4,7 @@ namespace vgraph {
 namespace video {
 namespace consts{
     const std::string& h264_profile("high");
-    const int output_bitrate(15*1024);
+    const int output_bitrate(80*1024);
 }
 namespace elem {
     namespace name {
@@ -21,10 +21,14 @@ namespace elem {
 
         // video
         const std::string& video_convert("video_convert");
+        const std::string& video_glupload("video_glupload");
         const std::string& video_rotate("video_rotate");
+        const std::string& video_scale("video_scale");
         const std::string& video_overlay("video_overlay");
+        const std::string& video_compositor("video_compositor");
         const std::string& video_convert2("video_convert2");
         const std::string& video_encode("video_encode");
+        const std::string& video_h264_parse("video_h264_parse");
 
         // output
         const std::string& mux("mux");
@@ -38,10 +42,15 @@ namespace elem {
         {name::audio_resample,   "audioresample"},
         {name::audio_encode,     "avenc_aac"},
         {name::video_convert,    "videoconvert"},
-        {name::video_rotate,     "videoflip"},
-        {name::video_overlay,    "cairooverlay"},
-        {name::video_convert2,   "videoconvert"},
-        {name::video_encode,     "x264enc"},
+        {name::video_glupload,   "glupload"},
+        {name::video_rotate,     "glvideoflip"},// {name::video_rotate,     "videoflip"},
+        {name::video_scale,      "gltransformation"},//{name::video_scale,      "videoscale"},
+        // {name::video_overlay,    "cairooverlay"}, // FIXME switch (somehow) to gloverlay compositor (theoretically should be able to use cairo still)
+        {name::video_overlay,    "overlaycomposition"},
+        {name::video_compositor, "gloverlaycompositor"},
+        // {name::video_convert2,   "videoconvert"},
+        {name::video_encode,     "nvh264enc"},// {name::video_encode,     "x264enc"},
+        {name::video_h264_parse, "h264parse"},
         {name::mux,              "mp4mux"},
         {name::sink,             "filesink"}
     };
@@ -53,14 +62,61 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay::overlay* ptr)
+    // basing a lot on: https://gitlab.freedesktop.org/gstreamer/gstreamer-rs/-/blob/main/examples/src/bin/overlay-composition.rs
+    // and on cairooverlay impl: https://github.com/GStreamer/gst-plugins-good/blob/master/ext/cairo/gstcairooverlay.c
+    GstVideoOverlayComposition* draw_cb(GstElement* overlay, GstSample* sample, overlay::overlay* ptr)
     {
+        GstBuffer* buffer = gst_sample_get_buffer(sample);
+        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
+
         long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
         static long first_raw_stamp = raw_stamp;
         double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
 
+        //FIXME it can be much better and cleaner and probably faster - i.e. probably no need to go through surface->cr->surface->sample
+        // to be figured out later
+        cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 3840, 2160);
+
+        cairo_t* cr = cairo_create(surface);
         ptr->draw(cr, stamp);
+        cairo_destroy(cr);
+
+        // int stride = cairo_image_surface_get_stride(surface); //whetever that is
+        unsigned char* data = cairo_image_surface_get_data(surface);
+        int size = cairo_image_surface_get_height (surface) * cairo_image_surface_get_stride (surface);
+        
+        GstBuffer* out_buffer = gst_buffer_new_wrapped_full(
+            (GstMemoryFlags)0, cairo_image_surface_get_data(surface), size, 0, size, surface, (GDestroyNotify)cairo_surface_destroy);
+
+        GstVideoOverlayCompositionMeta *composition_meta = gst_buffer_get_video_overlay_composition_meta(buffer);
+
+        gsize offset[GST_VIDEO_MAX_PLANES] = { 0, };
+        gint stride[GST_VIDEO_MAX_PLANES] = { cairo_image_surface_get_stride(surface), };
+        gst_buffer_add_video_meta_full(
+            out_buffer,
+            GST_VIDEO_FRAME_FLAG_NONE,
+            (G_BYTE_ORDER == G_LITTLE_ENDIAN ? GST_VIDEO_FORMAT_BGRA : GST_VIDEO_FORMAT_ARGB),
+            3840, 2160, 1, offset, stride);
+
+        GstVideoOverlayRectangle * rect = gst_video_overlay_rectangle_new_raw(
+            out_buffer, 0, 0, 3840, 2160, GST_VIDEO_OVERLAY_FORMAT_FLAG_PREMULTIPLIED_ALPHA);//GST_VIDEO_OVERLAY_FORMAT_FLAG_NONE);
+
+        GstVideoOverlayComposition* comp = gst_video_overlay_composition_new(rect);
+
+        gst_video_overlay_rectangle_unref(rect);
+        gst_buffer_unref(out_buffer);
+
+        return comp;
     }
+
+    // void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay::overlay* ptr)
+    // {
+    //     long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
+    //     static long first_raw_stamp = raw_stamp;
+    //     double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
+
+    //     ptr->draw(cr, stamp);
+    // }
 }
 
 
@@ -84,7 +140,7 @@ pipeline::~pipeline()
 
 bool pipeline::build()
 {
-    log.info("Creating pipeline elements_");
+    log.info("Creating pipeline elements");
 
     log.debug("Creating pipeline bin");
     GstElement* pipeline_ptr = gst_pipeline_new(elem::name::pipeline.c_str());
@@ -119,7 +175,7 @@ bool pipeline::build()
 
 bool pipeline::link()
 {
-    log.info("Linking pipeline elements_");
+    log.info("Linking pipeline elements");
     bool ok = true;
 
     //link input: source -> decode
@@ -134,15 +190,42 @@ bool pipeline::link()
 
     //link video: video_convert -> video_rotate -> video_overlay -> video_convert2 -> video_encode -> mux
     log.debug("Linking video path");
-    ok = link_elements(elem::name::video_convert, elem::name::video_rotate) && ok;
-    ok = link_elements(elem::name::video_rotate, elem::name::video_overlay) && ok;
-    ok = link_elements(elem::name::video_overlay, elem::name::video_convert2) && ok;
-    ok = link_elements(elem::name::video_convert2, elem::name::video_encode) && ok;
+    // ok = link_elements(elem::name::video_convert, elem::name::video_rotate) && ok;
+    // ok = link_elements(elem::name::video_rotate, elem::name::video_overlay) && ok;
+    // ok = link_elements(elem::name::video_overlay, elem::name::video_convert2) && ok;
+
+    /* REMOVE FROM THIS LINE */
+    GstCaps* filter_raw = gst_caps_from_string("video/x-raw");
+    ok = link_elements(elem::name::video_convert, elem::name::video_glupload, filter_raw) && ok;
+
+    GstCaps* filter_gpu = gst_caps_from_string("video/x-raw(memory:GLMemory)");
+    ok = link_elements(elem::name::video_glupload, elem::name::video_rotate, filter_gpu) && ok;
+    ok = link_elements(elem::name::video_rotate, elem::name::video_scale, filter_gpu) && ok;
+
+    GstCaps* filter_scale = gst_caps_from_string("video/x-raw(memory:GLMemory),width=3840,height=2160");
+
+    // GstCaps* filter_scale = gst_caps_new_simple("video/x-raw(memory:GLMemory)",
+    //                                             "width", G_TYPE_INT, 3840,
+    //                                             "height", G_TYPE_INT, 2160,
+    //                                             nullptr);
+
+    ok = link_elements(elem::name::video_scale, elem::name::video_overlay, filter_scale) && ok;
+
+    GstCaps* filter_composition = gst_caps_from_string("video/x-raw(memory:GLMemory, meta:GstVideoOverlayComposition)");
+    ok = link_elements(elem::name::video_overlay, elem::name::video_compositor, filter_composition) && ok;
+    ok = link_elements(elem::name::video_compositor, elem::name::video_encode, filter_gpu) && ok;
+
+    
+    /* REMOVE TO THIS LINE */
+    
+    // ok = link_elements(elem::name::video_convert2, elem::name::video_encode) && ok;
 
     GstCaps* filter = gst_caps_new_simple("video/x-h264",
                                           "profile", G_TYPE_STRING, consts::h264_profile.c_str(),
                                           nullptr);
-    ok = link_elements(elem::name::video_encode, elem::name::mux, filter) && ok;
+
+    ok = link_elements(elem::name::video_encode, elem::name::video_h264_parse, filter) && ok;
+    ok = link_elements(elem::name::video_h264_parse, elem::name::mux) && ok;
     gst_caps_unref(filter);
     filter = nullptr;
 

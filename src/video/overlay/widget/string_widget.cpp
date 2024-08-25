@@ -27,7 +27,7 @@ string_widget::string_widget(int x,
     border_width_(border_width),
     align_(align)
 {
-    buffer = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1920, 1080);
+    buffer = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 3840, 2160);
 
     cairo_t* cr = cairo_create(buffer);
 
