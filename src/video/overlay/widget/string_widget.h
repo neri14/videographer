@@ -14,10 +14,12 @@ namespace overlay {
 class string_widget: public widget {
 public:
     string_widget(int x, int y, const std::string& text, const std::string& font, const rgba& color, const rgba& border_color, int border_width, ETextAlign align);
-    ~string_widget() = default;
+    ~string_widget();
 
 private:
     void draw_impl(cairo_t* cr) override;
+
+    cairo_surface_t* buffer;
 
     int x_;
     int y_;

@@ -12,7 +12,21 @@ namespace overlay {
 overlay::overlay()
 {
     //TODO here will normally create widgets based on template file
-    widgets_.push_back(std::make_shared<string_widget>(100, 100, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 10, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 80, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 150, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 220, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 290, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 360, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 430, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 500, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 570, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 640, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 710, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 780, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 850, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 920, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    widgets_.push_back(std::make_shared<string_widget>(100, 990, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
 }
 
 overlay::~overlay()

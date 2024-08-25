@@ -26,18 +26,19 @@ string_widget::string_widget(int x,
     border_color_(border_color),
     border_width_(border_width),
     align_(align)
-{}
-
-void string_widget::draw_impl(cairo_t* cr)
 {
+    buffer = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 1920, 1080);
+
+    cairo_t* cr = cairo_create(buffer);
+
     //setup
     PangoLayout *layout = pango_cairo_create_layout(cr);
 
     //  set font
-    PangoFontDescription *font = pango_font_description_from_string(font_.c_str());
-    pango_layout_set_font_description (layout, font);
-    pango_font_description_free (font);
-    font = nullptr;
+    PangoFontDescription *pfont = pango_font_description_from_string(font_.c_str());
+    pango_layout_set_font_description (layout, pfont);
+    pango_font_description_free (pfont);
+    pfont = nullptr;
 
     //  set text and alignment
     pango_layout_set_text (layout, text_.c_str(), -1);
@@ -71,6 +72,19 @@ void string_widget::draw_impl(cairo_t* cr)
 
     // cleanup
     g_object_unref(layout);
+    cairo_destroy(cr);
+}
+
+string_widget::~string_widget()
+{
+    cairo_surface_destroy(buffer);
+    buffer = nullptr;
+}
+
+void string_widget::draw_impl(cairo_t* cr)
+{
+    cairo_set_source_surface(cr, buffer, 0, 0);
+    cairo_paint(cr);
 }
 
 
