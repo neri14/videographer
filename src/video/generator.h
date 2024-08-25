@@ -33,7 +33,8 @@ public:
              overlay::overlay& overlay,
              bool gpu,
              std::pair<int, int> output_resolution,
-             int output_bitrate);
+             int output_bitrate,
+             bool debug);
     ~generator();
 
     bool generate();
@@ -64,6 +65,7 @@ private:
     bool execute();
 
     utils::logging::logger log{"generator"};
+    bool debug_;
 
     overlay::overlay& overlay_;
     std::map<std::string, GstElement*> elements_;

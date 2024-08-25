@@ -106,14 +106,15 @@ void argument_parser::parse(int argc, char* argv[])
 
 bool argument_parser::has(const std::string& key) const
 {
-    if (!arguments_.contains(key))
-        throw argument_exception("Undefined argument key retrieval attempt");
+    assert_key_exists(key);
 
     return values_.contains(key);
 }
 
 int argument_parser::count(const std::string& key) const
 {
+    assert_key_exists(key);
+
     if (!has(key))
         return 0;
 
@@ -123,19 +124,32 @@ int argument_parser::count(const std::string& key) const
 template <>
 std::string argument_parser::get(const std::string& key) const
 {
-    if (!arguments_.contains(key))
-        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
+    assert_key_exists(key);
+    assert_key_provided(key);
+    assert_at_least_one_value(key);
+    assert_at_most_one_value(key);
 
-    if (!has(key))
-        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
+    return values_.at(key)[0];
+}
 
-    const auto& val = values_.at(key);
-    if (val.size() < 1)
-        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
-    if (val.size() > 1)
-        throw argument_exception(std::format("Retrieval of singular argument \"{}\" value that has more values", key));
+template <>
+double argument_parser::get(const std::string& key) const
+{
+    assert_key_exists(key);
+    assert_key_provided(key);
+    assert_at_least_one_value(key);
+    assert_at_most_one_value(key);
 
-    return val[0];
+    auto& val = values_.at(key)[0];
+    double ret = 0;
+    try {
+        ret = std::stod(val);
+    } catch (std::invalid_argument) {
+        throw argument_exception(std::format("Could not parse value '{}' of argument '{}' as floating point number", val, key));
+    } catch (std::out_of_range) {
+        throw argument_exception(std::format("Value '{}' of argument '{}' is out of range", val, key));
+    }
+    return ret;
 }
 
 template <>
@@ -167,17 +181,18 @@ int argument_parser::get(const std::string& key) const
 template <>
 std::vector<std::string> argument_parser::get(const std::string& key) const
 {
-    if (!arguments_.contains(key))
-        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
+    assert_key_exists(key);
+    assert_key_provided(key);
+    assert_at_least_one_value(key);
 
-    if (!has(key))
-        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
+    return values_.at(key);
+}
 
-    const auto& val = values_.at(key);
-    if (val.size() < 1)
-        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
-
-    return val;
+template <>
+bool argument_parser::get(const std::string& key) const
+{
+    assert_key_exists(key);
+    return has(key);
 }
 
 std::map<std::string, std::vector<std::string>> argument_parser::get_raw() const
@@ -185,10 +200,28 @@ std::map<std::string, std::vector<std::string>> argument_parser::get_raw() const
     return values_;
 }
 
-template <>
-bool argument_parser::get(const std::string& key) const
+void argument_parser::assert_key_exists(const std::string& key) const
 {
-    return has(key);
+    if (!arguments_.contains(key))
+        throw argument_exception(std::format("Undefined argument \"{}\"", key));
+}
+
+void argument_parser::assert_key_provided(const std::string& key) const
+{
+    if (!has(key))
+        throw argument_exception(std::format("Argument \"{}\" has no value", key));
+}
+
+void argument_parser::assert_at_least_one_value(const std::string& key) const
+{
+    if (values_.at(key).size() < 1)
+        throw argument_exception(std::format("Argument \"{}\" has no associated value", key));
+}
+
+void argument_parser::assert_at_most_one_value(const std::string& key) const
+{
+    if (values_.at(key).size() > 1)
+        throw argument_exception(std::format("Argument \"{}\" has more than one associated value", key));
 }
 
 void argument_parser::print_help() const

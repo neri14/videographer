@@ -3,6 +3,8 @@
 #include "utils/logging/backend.h"
 #include "utils/logging/stream_sink.h"
 
+#include "telemetry/telemetry.h"
+
 #include "video/generator.h"
 #include "video/overlay/overlay.h"
 
@@ -26,6 +28,8 @@ void manager::run()
         log.warning("!! FOR BETTER PERFORMANCE CONSIDER GENERATING VIDEO ON GPU !! (-g/--gpu flag)");
     }
 
+    std::shared_ptr<telemetry::telemetry> tele = telemetry::telemetry::load(args.telemetry, args.offset);
+
     auto t1 = std::chrono::high_resolution_clock::now();
 
     video::overlay::overlay overlay(args.resolution, args.timecode);
@@ -33,7 +37,7 @@ void manager::run()
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
-    video::generator gen(args.input, args.output, overlay, args.gpu, args.resolution, args.bitrate);
+    video::generator gen(args.input, args.output, overlay, args.gpu, args.resolution, args.bitrate, args.debug);
     gen.generate();
 
     auto t3 = std::chrono::high_resolution_clock::now();

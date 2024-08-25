@@ -7,6 +7,7 @@ namespace key {
     std::string debug("debug");
     std::string gpu("gpu");
     std::string telemetry("telemetry");
+    std::string offset("offset");
     std::string input("input");
     std::string output("output");
     std::string timecode("timecode");
@@ -23,6 +24,7 @@ utils::argument_parser prepare_parser()
     parser.add_argument(key::gpu, utils::argument().flag().option("-g").option("--gpu").description("Use Nvidia GPU for processing"));
 
     parser.add_argument(key::telemetry, utils::argument().option("-t").option("--telemetry").description("Telemetry file path"));
+    parser.add_argument(key::offset, utils::argument().option("-s").option("--offset").description("Telemetry offset in seconds (video time at which track starts)"));
     parser.add_argument(key::input, utils::argument().option("-i").option("--input").description("Input video file path"));
     parser.add_argument(key::output, utils::argument().option("-o").option("--output").description("Output video file path"));
     
@@ -40,6 +42,22 @@ bool read_mandatory_value(const utils::argument_parser& parser, const std::strin
     if (!parser.has(name)) {
         log.error("Missing mandatory {} argument", name);
         return false;
+    }
+
+    if (parser.count(name) > 1) {
+        log.error("Expected 1 value for {} got {}", name, parser.count(name));
+        return false;
+    }
+
+    value_out = parser.get<T>(name);
+    return true;
+}
+
+template <typename T>
+bool read_optional_value(const utils::argument_parser& parser, const std::string& name, utils::logging::logger& log, std::optional<T>& value_out)
+{
+    if (!parser.has(name)) {
+        return true;
     }
 
     if (parser.count(name) > 1) {
@@ -75,6 +93,7 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
     valid = read_mandatory_value<std::string>(parser, key::telemetry, log, a.telemetry) && valid;
     valid = read_mandatory_value<std::string>(parser, key::input, log, a.input) && valid;
     valid = read_mandatory_value<std::string>(parser, key::output, log, a.output) && valid;
+    valid = read_optional_value<double>(parser, key::offset, log, a.offset) && valid;
 
     a.timecode = parser.get<bool>(key::timecode);
 
