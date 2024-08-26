@@ -139,6 +139,32 @@ std::string argument_parser::get(const std::string& key) const
 }
 
 template <>
+int argument_parser::get(const std::string& key) const
+{
+    if (!arguments_.contains(key))
+        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
+
+    if (!has(key))
+        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
+
+    const auto& val = values_.at(key);
+    if (val.size() < 1)
+        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
+    if (val.size() > 1)
+        throw argument_exception(std::format("Retrieval of singular argument \"{}\" value that has more values", key));
+
+    int ret = 0;
+    try {
+        ret = std::stoi(val[0]);
+    } catch(std::invalid_argument) {
+        throw argument_exception(std::format("Error parsing value \"{}\" of argument \"{}\" as int", val[0], key));
+    } catch(std::out_of_range) {
+        throw argument_exception(std::format("Value \"{}\" of argument \"{}\" is out of range", val[0], key));
+    }
+    return ret;
+}//FIXME to be refactored after merging with improved arguments parser
+
+template <>
 std::vector<std::string> argument_parser::get(const std::string& key) const
 {
     if (!arguments_.contains(key))
