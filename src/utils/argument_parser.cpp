@@ -155,25 +155,19 @@ double argument_parser::get(const std::string& key) const
 template <>
 int argument_parser::get(const std::string& key) const
 {
-    if (!arguments_.contains(key))
-        throw argument_exception(std::format("Undefined argument \"{}\" retrieval attempt", key));
-
-    if (!has(key))
-        throw argument_exception(std::format("Retrieval of not provided argument \"{}\" value", key));
+    assert_key_exists(key);
+    assert_key_provided(key);
+    assert_at_least_one_value(key);
+    assert_at_most_one_value(key);
 
     const auto& val = values_.at(key);
-    if (val.size() < 1)
-        throw argument_exception(std::format("Retrieval of argument \"{}\" value that has no associated value", key));
-    if (val.size() > 1)
-        throw argument_exception(std::format("Retrieval of singular argument \"{}\" value that has more values", key));
-
     int ret = 0;
     try {
         ret = std::stoi(val[0]);
     } catch(std::invalid_argument) {
-        throw argument_exception(std::format("Error parsing value \"{}\" of argument \"{}\" as int", val[0], key));
+        throw argument_exception(std::format("Could not parse value '{}' of argument '{}' as integer", val[0], key));
     } catch(std::out_of_range) {
-        throw argument_exception(std::format("Value \"{}\" of argument \"{}\" is out of range", val[0], key));
+        throw argument_exception(std::format("Value '{}' of argument '{}' is out of range", val[0], key));
     }
     return ret;
 }//FIXME to be refactored after merging with improved arguments parser
