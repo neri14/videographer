@@ -65,8 +65,6 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    // basing a lot on: https://gitlab.freedesktop.org/gstreamer/gstreamer-rs/-/blob/main/examples/src/bin/overlay-composition.rs
-    // and on cairooverlay impl: https://github.com/GStreamer/gst-plugins-good/blob/master/ext/cairo/gstcairooverlay.c
     GstVideoOverlayComposition* draw_cb(GstElement* overlay, GstSample* sample, overlay::overlay* ptr)
     {
         GstBuffer* buffer = gst_sample_get_buffer(sample);
@@ -76,15 +74,12 @@ namespace helper {
         static long first_raw_stamp = raw_stamp;
         double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
 
-        //FIXME it can be much better and cleaner and probably faster - i.e. probably no need to go through surface->cr->surface->sample
-        // to be figured out later
         cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 3840, 2160);
 
         cairo_t* cr = cairo_create(surface);
         ptr->draw(cr, stamp);
         cairo_destroy(cr);
 
-        // int stride = cairo_image_surface_get_stride(surface); //whetever that is
         unsigned char* data = cairo_image_surface_get_data(surface);
         int size = cairo_image_surface_get_height (surface) * cairo_image_surface_get_stride (surface);
         
@@ -111,15 +106,6 @@ namespace helper {
 
         return comp;
     }
-
-    // void draw_cb(GstElement* overlay, cairo_t* cr, guint64 timestamp, guint64 duration, overlay::overlay* ptr)
-    // {
-    //     long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
-    //     static long first_raw_stamp = raw_stamp;
-    //     double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
-
-    //     ptr->draw(cr, stamp);
-    // }
 }
 
 bool operator==(const pipeline_element& lhs, const pipeline_element& rhs)

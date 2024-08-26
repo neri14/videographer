@@ -28,7 +28,8 @@ void manager::run()
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    video::overlay::overlay overlay;
+    video::overlay::overlay overlay(args.resolution);
+    overlay.precache();
 
     auto t2 = std::chrono::high_resolution_clock::now();
 

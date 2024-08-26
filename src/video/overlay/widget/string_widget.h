@@ -17,9 +17,7 @@ public:
     ~string_widget();
 
 private:
-    void draw_impl(cairo_t* cr) override;
-
-    cairo_surface_t* buffer;
+    void draw_static_impl(cairo_t* cr) override;
 
     int x_;
     int y_;
