@@ -22,14 +22,14 @@ public:
     void precache();
     void draw(cairo_t* cr, double timestamp);
 
+    const int width;
+    const int height;
+
 private:
     utils::logging::logger log{"overlay"};
 
     void update_dynamic_cache(double timestamp);
     void add_widget(std::shared_ptr<widget> ptr);
-
-    int width;
-    int height;
 
     long total_drawing_time = 0;
     int total_drawn_frames = 0;

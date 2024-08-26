@@ -65,44 +65,51 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
-    GstVideoOverlayComposition* draw_cb(GstElement* overlay, GstSample* sample, overlay::overlay* ptr)
+    /**NOTE:
+      * should only be called from draw_cb due to static first_raw_stamp
+      * hack for offsetting received timestamps into correct time domain
+      */
+    double normalize_timestamp(GstClockTime timestamp)
     {
-        GstBuffer* buffer = gst_sample_get_buffer(sample);
-        GstClockTime timestamp = GST_BUFFER_PTS(buffer);
-
         long raw_stamp = GST_TIME_AS_USECONDS(timestamp);
         static long first_raw_stamp = raw_stamp;
-        double stamp = (raw_stamp - first_raw_stamp) / 1000000.0;
+        return (raw_stamp - first_raw_stamp) / 1000000.0;
+    }
 
-        cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, 3840, 2160);
+    GstVideoOverlayComposition* draw_cb(GstElement* overlay, GstSample* sample, overlay::overlay* ptr)
+    {
+        // create surface for drawing
+        cairo_surface_t* surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, ptr->width, ptr->height);
 
+        // draw overlay onto surface
         cairo_t* cr = cairo_create(surface);
-        ptr->draw(cr, stamp);
+        ptr->draw(cr, normalize_timestamp(GST_BUFFER_PTS(gst_sample_get_buffer(sample))));
         cairo_destroy(cr);
 
-        unsigned char* data = cairo_image_surface_get_data(surface);
-        int size = cairo_image_surface_get_height (surface) * cairo_image_surface_get_stride (surface);
-        
+        // make outgoing buffer out of surface
+        int size = cairo_image_surface_get_height(surface) * cairo_image_surface_get_stride(surface);
         GstBuffer* out_buffer = gst_buffer_new_wrapped_full(
             (GstMemoryFlags)0, cairo_image_surface_get_data(surface), size, 0, size, surface, (GDestroyNotify)cairo_surface_destroy);
+            //note - normally we'd call cairo_surface_destroy to avoid memory leaks,
+            // but here we pass it as "notify" callback so that destroying buffer destroys surface too
 
-        GstVideoOverlayCompositionMeta *composition_meta = gst_buffer_get_video_overlay_composition_meta(buffer);
-
+        // add metadata to outgoing buffer
         gsize offset[GST_VIDEO_MAX_PLANES] = { 0, };
         gint stride[GST_VIDEO_MAX_PLANES] = { cairo_image_surface_get_stride(surface), };
         gst_buffer_add_video_meta_full(
             out_buffer,
             GST_VIDEO_FRAME_FLAG_NONE,
             (G_BYTE_ORDER == G_LITTLE_ENDIAN ? GST_VIDEO_FORMAT_BGRA : GST_VIDEO_FORMAT_ARGB),
-            3840, 2160, 1, offset, stride);
+            ptr->width, ptr->height, 1/*number of planes*/, offset, stride);
 
+        //create overlay rectangle from outgoing buffer
         GstVideoOverlayRectangle * rect = gst_video_overlay_rectangle_new_raw(
-            out_buffer, 0, 0, 3840, 2160, GST_VIDEO_OVERLAY_FORMAT_FLAG_PREMULTIPLIED_ALPHA);//GST_VIDEO_OVERLAY_FORMAT_FLAG_NONE);
-
-        GstVideoOverlayComposition* comp = gst_video_overlay_composition_new(rect);
-
-        gst_video_overlay_rectangle_unref(rect);
+            out_buffer, 0/*x*/, 0/*y*/, ptr->width, ptr->height, GST_VIDEO_OVERLAY_FORMAT_FLAG_PREMULTIPLIED_ALPHA);
         gst_buffer_unref(out_buffer);
+
+        //create overlay composition from rectangle
+        GstVideoOverlayComposition* comp = gst_video_overlay_composition_new(rect);
+        gst_video_overlay_rectangle_unref(rect);
 
         return comp;
     }
