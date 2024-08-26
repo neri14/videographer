@@ -7,6 +7,7 @@
 #include "video/overlay/overlay.h"
 
 #include <iostream>
+#include <chrono>
 
 namespace vgraph {
 
@@ -20,10 +21,29 @@ void manager::init(int argc, char* argv[])
 
 void manager::run()
 {
-    video::overlay::overlay overlay;
-    video::generator gen(args.input, args.output, overlay);
+    log.info("Generation will use {}", args.gpu ? "GPU" : "CPU");
+    if (!args.gpu) {
+        log.warning("!! FOR BETTER PERFORMANCE CONSIDER GENERATING VIDEO ON GPU !! (-g/--gpu flag)");
+    }
 
+    auto t1 = std::chrono::high_resolution_clock::now();
+
+    video::overlay::overlay overlay(args.resolution, args.timecode);
+    overlay.precache();
+
+    auto t2 = std::chrono::high_resolution_clock::now();
+
+    video::generator gen(args.input, args.output, overlay, args.gpu, args.resolution, args.bitrate);
     gen.generate();
+
+    auto t3 = std::chrono::high_resolution_clock::now();
+
+    log.info("Overlay pre-setup time: {:.3f} s",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()/1000.0);
+    log.info("Video generation time: {:.3f} s",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count()/1000.0);
+    log.info("Total time: {:.3f} s",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t1).count()/1000.0);
 }
 
 void manager::enable_logging()

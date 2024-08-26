@@ -18,6 +18,7 @@ string_widget::string_widget(int x,
                              const rgba& border_color,
                              int border_width,
                              ETextAlign align) :
+    widget::widget(EType_Static),
     x_(x),
     y_(y),
     text_(text),
@@ -28,19 +29,22 @@ string_widget::string_widget(int x,
     align_(align)
 {}
 
-void string_widget::draw_impl(cairo_t* cr)
+string_widget::~string_widget()
+{}
+
+void string_widget::draw_static_impl(cairo_t* cr)
 {
     //setup
     PangoLayout *layout = pango_cairo_create_layout(cr);
 
     //  set font
-    PangoFontDescription *font = pango_font_description_from_string(font_.c_str());
-    pango_layout_set_font_description (layout, font);
-    pango_font_description_free (font);
-    font = nullptr;
+    PangoFontDescription *pfont = pango_font_description_from_string(font_.c_str());
+    pango_layout_set_font_description(layout, pfont);
+    pango_font_description_free(pfont);
+    pfont = nullptr;
 
     //  set text and alignment
-    pango_layout_set_text (layout, text_.c_str(), -1);
+    pango_layout_set_text(layout, text_.c_str(), -1);
     pango_layout_set_alignment(layout, to_pango_align(align_));
 
     //  setup offset depending on alignment
@@ -51,7 +55,7 @@ void string_widget::draw_impl(cairo_t* cr)
     if (align_ == ETextAlign::Right) {
         offset = w;
     } else if (align_ == ETextAlign::Center) {
-        offset = h;
+        offset = w/2;
     }
 
     // draw border
@@ -72,7 +76,6 @@ void string_widget::draw_impl(cairo_t* cr)
     // cleanup
     g_object_unref(layout);
 }
-
 
 } // namespace overlay
 } // namespace video
