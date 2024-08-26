@@ -9,7 +9,7 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-overlay::overlay(std::pair<int, int> resolution):
+overlay::overlay(std::pair<int, int> resolution, bool timecode):
     width(resolution.first),
     height(resolution.second)
 {
@@ -32,6 +32,10 @@ overlay::overlay(std::pair<int, int> resolution):
 
     static_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     dynamic_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
+
+    if (timecode) {
+        tc_widget_ = std::make_shared<timecode_widget>(width/2);
+    }
 }
 
 overlay::~overlay()
@@ -93,6 +97,10 @@ void overlay::draw(cairo_t* cr, double timestamp)
     cairo_set_source_surface(cr, dynamic_cache, 0, 0);
     cairo_paint(cr);
 
+    if (tc_widget_) {
+        tc_widget_->draw(cr, timestamp);
+    }
+
     auto t2 = std::chrono::high_resolution_clock::now();
     total_drawing_time += std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
     total_drawn_frames++;
@@ -136,15 +144,4 @@ void overlay::add_widget(std::shared_ptr<widget> ptr)
 } // namespace vgraph
 
 
-//FIXME to be used for special timecode widget?
-// std::string timestamp_str(double timestamp)
-// {
-//     double s = timestamp;
-//     int m = static_cast<int>(s)/60;
-//     int h = m/60;
 
-//     m = m-h*60;
-//     s = s-m*60;
-
-//     return std::format("{:02d}:{:02d}:{:09.06f}",h,m,s);
-// }

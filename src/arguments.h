@@ -13,6 +13,8 @@ struct arguments {
     std::string input = "";
     std::string output = "";
 
+    bool timecode = false;
+
     std::pair<int, int> resolution = {3840,2160};
     int bitrate = {80*1024};
 

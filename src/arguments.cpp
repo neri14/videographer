@@ -9,6 +9,7 @@ namespace key {
     std::string telemetry("telemetry");
     std::string input("input");
     std::string output("output");
+    std::string timecode("timecode");
     std::string resolution("resolution");
     std::string bitrate("bitrate");
 }
@@ -25,6 +26,8 @@ utils::argument_parser prepare_parser()
     parser.add_argument(key::input, utils::argument().option("-i").option("--input").description("Input video file path"));
     parser.add_argument(key::output, utils::argument().option("-o").option("--output").description("Output video file path"));
     
+    parser.add_argument(key::timecode, utils::argument().flag().option("-c").option("--timecode").description("Draw a timecode on each frame"));
+
     parser.add_argument(key::resolution, utils::argument().option("-r").option("--resolution").description("Output video resolution, format: WIDTHxHEIGHT"));
     parser.add_argument(key::bitrate, utils::argument().option("-b").option("--bitrate").description("Output video bitrate, in kbit/s"));
 
@@ -72,6 +75,8 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
     valid = read_mandatory_value<std::string>(parser, key::telemetry, log, a.telemetry) && valid;
     valid = read_mandatory_value<std::string>(parser, key::input, log, a.input) && valid;
     valid = read_mandatory_value<std::string>(parser, key::output, log, a.output) && valid;
+
+    a.timecode = parser.get<bool>(key::timecode);
 
     std::string res_str;
     if (read_mandatory_value<std::string>(parser, key::resolution, log, res_str)) {

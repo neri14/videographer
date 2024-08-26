@@ -3,6 +3,7 @@
 
 #include "utils/logging/logger.h"
 #include "widget/widget.h"
+#include "widget/timecode_widget.h"
 #include <memory>
 
 extern "C" {
@@ -15,7 +16,7 @@ namespace overlay {
 
 class overlay {
 public:
-    overlay(std::pair<int, int> resolution);
+    overlay(std::pair<int, int> resolution, bool timecode);
     ~overlay();
 
     void precache();
@@ -38,6 +39,7 @@ private:
 
     std::vector<std::shared_ptr<widget>> static_widgets_;
     std::vector<std::shared_ptr<widget>> dynamic_widgets_;
+    std::shared_ptr<timecode_widget> tc_widget_;
 
     cairo_surface_t* static_cache;
     cairo_surface_t* dynamic_cache;

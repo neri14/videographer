@@ -27,12 +27,10 @@ string_widget::string_widget(int x,
     border_color_(border_color),
     border_width_(border_width),
     align_(align)
-{
-}
+{}
 
 string_widget::~string_widget()
-{
-}
+{}
 
 void string_widget::draw_static_impl(cairo_t* cr)
 {
