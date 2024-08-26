@@ -14,21 +14,26 @@ overlay::overlay(std::shared_ptr<layout> lay, std::pair<int, int> resolution, bo
     height(resolution.second)
 {
     //TODO here we'll normally create widgets based on layout from lay argument
-    add_widget(std::make_shared<string_widget>(1000,  10, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
-    add_widget(std::make_shared<string_widget>(1000,  80, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 150, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
-    add_widget(std::make_shared<string_widget>(1000, 220, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 290, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
-    add_widget(std::make_shared<string_widget>(1000, 360, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 430, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
-    add_widget(std::make_shared<string_widget>(1000, 500, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 570, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
-    add_widget(std::make_shared<string_widget>(1000, 640, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 710, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
-    add_widget(std::make_shared<string_widget>(1000, 780, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
-    add_widget(std::make_shared<string_widget>(1000, 850, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
-    add_widget(std::make_shared<string_widget>(1000, 920, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000,  10, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    // add_widget(std::make_shared<string_widget>(1000,  80, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 150, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
+    // add_widget(std::make_shared<string_widget>(1000, 220, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 290, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    // add_widget(std::make_shared<string_widget>(1000, 360, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 430, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
+    // add_widget(std::make_shared<string_widget>(1000, 500, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 570, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    // add_widget(std::make_shared<string_widget>(1000, 640, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 710, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
+    // add_widget(std::make_shared<string_widget>(1000, 780, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
+    // add_widget(std::make_shared<string_widget>(1000, 850, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
+    // add_widget(std::make_shared<string_widget>(1000, 920, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
     add_widget(std::make_shared<string_widget>(1000, 990, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
+    if (lay) {
+        for (auto wdgt : *lay) {
+            add_widget(wdgt);
+        }
+    }
 
     static_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     dynamic_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);

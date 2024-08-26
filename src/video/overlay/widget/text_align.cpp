@@ -1,10 +1,11 @@
 #include "text_align.h"
+#include "utils/logging/logger.h"
 
 namespace vgraph {
 namespace video {
 namespace overlay {
 
-ETextAlign from_string(const std::string& str)
+ETextAlign text_align_from_string(const std::string& str)
 {
     if (str == "right") {
         return ETextAlign::Right;
@@ -14,7 +15,7 @@ ETextAlign from_string(const std::string& str)
         return ETextAlign::Left;
     }
 
-    utils::logging::logger{"ETextAlign::from_string"}
+    utils::logging::logger{"text_align_from_string"}
         .warning("Unknown conversion from \"{}\" to ETextAlign, falling back to ETextAlig::Left", str);
     return ETextAlign::Left;
 }

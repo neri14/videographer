@@ -44,9 +44,10 @@ void manager::run()
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
+    video::overlay::layout_parser layout_parser;
     std::shared_ptr<video::overlay::layout> lay = nullptr;
     if (args.layout) {
-        lay = video::overlay::layout::load(*args.layout);
+        lay = layout_parser.parse(*args.layout);
         if (!lay) {
             log.error("Unable to load layout from defined path - exitting...");
             return;
