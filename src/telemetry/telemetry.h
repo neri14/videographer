@@ -1,0 +1,29 @@
+#ifndef TELEMETRY_H
+#define TELEMETRY_H
+
+#include <memory>
+
+#include "utils/logging/logger.h"
+#include "datapoint.h"
+
+namespace vgraph {
+namespace telemetry {
+
+class telemetry {
+public:
+    telemetry(std::shared_ptr<datapoint_sequence> seq, long offset=0);
+    ~telemetry() = default;
+
+    std::shared_ptr<datapoint> get(double timestamp) const;
+
+    static std::shared_ptr<telemetry> load(const std::string& path, std::optional<double> offset); // optional offset in seconds
+
+private:
+    utils::logging::logger log{"telemetry"};
+    long offset_; // offset in microseconds
+};
+
+} // namespace telemetry
+} // namespace vgraph
+
+#endif // TELEMETRY_H

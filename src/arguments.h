@@ -2,6 +2,7 @@
 #define ARGUMENTS_H
 
 #include <string>
+#include <optional>
 
 namespace vgraph {
 
@@ -10,6 +11,7 @@ struct arguments {
     bool gpu = false;
 
     std::string telemetry = "";
+    std::optional<double> offset = std::nullopt;
     std::string input = "";
     std::string output = "";
 

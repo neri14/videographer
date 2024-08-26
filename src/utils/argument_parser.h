@@ -58,6 +58,11 @@ public:
     void print_help() const;
 
 private:
+    void assert_key_exists(const std::string& key) const;
+    void assert_key_provided(const std::string& key) const;
+    void assert_at_least_one_value(const std::string& key) const;
+    void assert_at_most_one_value(const std::string& key) const;
+
     void print_help_usage() const;
     void print_help_details() const;
 

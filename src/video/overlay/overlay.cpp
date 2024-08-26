@@ -41,8 +41,8 @@ overlay::overlay(std::pair<int, int> resolution, bool timecode):
 overlay::~overlay()
 {
     double total_s = total_drawing_time/1000000.0;
-    log.info("Total drawing time: {:.6f} s", total_s);
-    log.info("Average drawing time: {:.6f} s/frame", total_s/total_drawn_frames);
+    log.info("Total drawing time: {:.3f} s ({:.6f} s/frame, {} frames)",
+             total_s, total_s/total_drawn_frames, total_drawn_frames);
     log.info("Cache hit ratio {:.1f}%", (100.0*cache_hit)/(cache_hit+cache_miss));
 
     if (static_cache) {

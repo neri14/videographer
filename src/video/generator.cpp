@@ -126,13 +126,15 @@ generator::generator(const std::string& input_path,
                    overlay::overlay& overlay,
                    bool gpu,
                    std::pair<int,int> output_resolution,
-                   int output_bitrate):
+                   int output_bitrate,
+                   bool debug):
     gpu_(gpu),
     input_path_(input_path),
     output_path_(output_path),
     overlay_(overlay),
     output_resolution_(output_resolution),
-    output_bitrate_(output_bitrate)
+    output_bitrate_(output_bitrate),
+    debug_(debug)
 {}
 
 generator::~generator()
@@ -485,8 +487,8 @@ bool generator::execute()
             gint64 pos, len;
             if (gst_element_query_position(ptr, GST_FORMAT_TIME, &pos) && gst_element_query_duration(ptr, GST_FORMAT_TIME, &len)) {
                 double pct = 100.0 * static_cast<double>(pos) / static_cast<double>(len);
-                // g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)\r", GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct);
-                g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)\n", GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct);
+                g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)%s",
+                         GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct, debug_ ? "\n" : "\r");
             }
         }
     } while (!terminate);
