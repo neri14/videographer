@@ -4,6 +4,7 @@
 #include "utils/logging/logger.h"
 #include "widget/widget.h"
 #include "widget/timecode_widget.h"
+#include "layout.h"
 #include <memory>
 
 extern "C" {
@@ -16,7 +17,7 @@ namespace overlay {
 
 class overlay {
 public:
-    overlay(std::pair<int, int> resolution, bool timecode);
+    overlay(std::shared_ptr<layout> lay, std::pair<int, int> resolution, bool timecode);
     ~overlay();
 
     void precache();

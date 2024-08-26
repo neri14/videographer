@@ -9,11 +9,11 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-overlay::overlay(std::pair<int, int> resolution, bool timecode):
+overlay::overlay(std::shared_ptr<layout> lay, std::pair<int, int> resolution, bool timecode):
     width(resolution.first),
     height(resolution.second)
 {
-    //TODO here we'll normally create widgets based on template file
+    //TODO here we'll normally create widgets based on layout from lay argument
     add_widget(std::make_shared<string_widget>(1000,  10, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Left));
     add_widget(std::make_shared<string_widget>(1000,  80, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Center));
     add_widget(std::make_shared<string_widget>(1000, 150, "Hello World", "DejaVu Sans 64", color::white, color::black, 4, ETextAlign::Right));
