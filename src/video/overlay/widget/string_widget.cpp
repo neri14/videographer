@@ -27,7 +27,12 @@ string_widget::string_widget(int x,
     border_color_(border_color),
     border_width_(border_width),
     align_(align)
-{}
+{
+    log.debug("Created string widget ({}{}), x: {}, y: {}, text: {}, font: {}",
+              is_static() ? "static" : "",
+              is_dynamic() ? "dynamic" : "",
+              x_, y_, text_, font_);
+}
 
 string_widget::~string_widget()
 {}
@@ -63,6 +68,9 @@ void string_widget::draw_static_impl(cairo_t* cr)
 
     cairo_set_source_rgba(cr, border_color_.r, border_color_.g, border_color_.b, border_color_.a);
     cairo_set_line_width(cr, border_width_*2);
+
+    cairo_set_line_cap(cr, CAIRO_LINE_CAP_SQUARE);
+    cairo_set_line_join(cr, CAIRO_LINE_JOIN_BEVEL);
 
     pango_cairo_layout_path(cr, layout);
     cairo_stroke(cr);

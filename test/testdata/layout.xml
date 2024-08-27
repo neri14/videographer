@@ -1,0 +1,46 @@
+<!-- widget (x,y) in global reference plane is always sum of it's tag and all parent tags x's and y's -->
+<!-- align: Left means widget's left edge is at x, Center means widget's center is at x, Right means widget's right edge is at x -->
+
+<layout>
+    <widget type="datetime" x="10" y="10" align="left" key="timestamp" format="%Y-%m-%d %H:%M:%S" utcoffset="2"
+            font="DejaVu Sans 64" color="white" border-color="black" border-width="2" />
+
+    <!-- TODO: <widget type="map"/> -->
+    <!-- TODO: <widget type="chart"/> -->
+
+    <!-- left column -->
+    <container x="230" y="1660">
+        <container x="0" y="0">
+        </container>
+        <container x="0" y="150">
+            <widget type="string" x="0" y="0" text="KM/H"
+                    font="DejaVu Sans 32" color="white" border-color="black" border-width="4" align="right" />
+            <widget type="value" x="0" y="38" key="speed" precision="1"
+                    font="DejaVu Sans 64" color="white" border-color="black" border-width="4" align="right" />
+        </container>
+        <container x="0" y="300">
+            <widget type="string" x="0" y="0" text="WATT"
+                    font="DejaVu Sans 32" color="white" border-color="black" border-width="4" align="right" />
+            <widget type="value" x="0" y="38" key="power" precision="0"
+                    font="DejaVu Sans 64" color="white" border-color="black" border-width="4" align="right" />
+        </container>
+    </container>
+
+    <!-- right column -->
+    <container x="3770" y="1660">
+        <container x="0" y="0">
+        </container>
+        <container x="0" y="150">
+            <widget type="string" x="0" y="0" text="GRADIENT (%)"
+                    font="DejaVu Sans 32" color="white" border-color="black" border-width="4" align="right" />
+            <widget type="value" x="0" y="38" key="gradient" precision="1"
+                    font="DejaVu Sans 64" color="white" border-color="black" border-width="4" align="right" />
+        </container>
+        <container x="0" y="300">
+            <widget type="string" x="0" y="0" text="KM"
+                    font="DejaVu Sans 32" color="white" border-color="black" border-width="4" align="right" />
+            <widget type="value" x="0" y="38" key="distance" precision="1"
+                    font="DejaVu Sans 64" color="white" border-color="black" border-width="4" align="right" />
+        </container>
+    </container>
+</layout>

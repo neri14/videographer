@@ -1,8 +1,6 @@
 #ifndef TEXT_ALIGN_H
 #define TEXT_ALIGN_H
 
-#include "utils/logging/logger.h"
-
 #include <map>
 #include <string>
 
@@ -20,7 +18,7 @@ enum class ETextAlign {
     Right
 };
 
-ETextAlign from_string(const std::string& str);
+ETextAlign text_align_from_string(const std::string& str);
 PangoAlignment to_pango_align(ETextAlign align);
 
 } // namespace overlay

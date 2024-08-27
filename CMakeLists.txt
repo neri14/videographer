@@ -24,13 +24,15 @@ pkg_search_module(gstreamer REQUIRED IMPORTED_TARGET gstreamer-1.0)
 pkg_search_module(gstreamer-video REQUIRED IMPORTED_TARGET gstreamer-video-1.0)
 pkg_search_module(Cairo REQUIRED IMPORTED_TARGET cairo)
 pkg_search_module(PangoCairo REQUIRED IMPORTED_TARGET pangocairo)
+pkg_search_module(pugixml REQUIRED IMPORTED_TARGET pugixml)
 
 # link libraries to vgraph_lib
-target_link_libraries(vgraph_lib PRIVATE
+target_link_libraries(vgraph_lib PUBLIC
                       PkgConfig::gstreamer
                       PkgConfig::gstreamer-video
                       PkgConfig::Cairo
                       PkgConfig::PangoCairo
+                      PkgConfig::pugixml
                       garmin
                       )
 

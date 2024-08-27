@@ -6,6 +6,7 @@
 #include "telemetry/telemetry.h"
 
 #include "video/generator.h"
+#include "video/overlay/layout.h"
 #include "video/overlay/overlay.h"
 
 #include <iostream>
@@ -30,11 +31,32 @@ void manager::run()
 
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    std::shared_ptr<telemetry::telemetry> tele = telemetry::telemetry::load(args.telemetry, args.offset);
+    std::shared_ptr<telemetry::telemetry> tele = nullptr;
+    if (args.telemetry) {
+        tele = telemetry::telemetry::load(*args.telemetry, args.offset);
+        if (!tele) {
+            log.error("Unable to load telemetry from defined path - exitting...");
+            return;
+        }
+    } else {
+        log.warning("NO TELEMETRY FILE PROVIDED - NO DATA-DRIVEN OVERLAY WILL BE GENERATED");
+    }
 
     auto t2 = std::chrono::high_resolution_clock::now();
 
-    video::overlay::overlay overlay(args.resolution, args.timecode);
+    video::overlay::layout_parser layout_parser;
+    std::shared_ptr<video::overlay::layout> lay = nullptr;
+    if (args.layout) {
+        lay = layout_parser.parse(*args.layout);
+        if (!lay) {
+            log.error("Unable to load layout from defined path - exitting...");
+            return;
+        }
+    } else {
+        log.warning("NO LAYOUT FILE PROVIDED - NO DATA-DRIVEN OVERLAY WILL BE GENERATED");
+    }
+
+    video::overlay::overlay overlay(lay, args.resolution, args.timecode);
     overlay.precache();
 
     auto t3 = std::chrono::high_resolution_clock::now();

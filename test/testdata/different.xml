@@ -1,0 +1,7 @@
+<layout>
+    <sometag type="datetime" />
+
+    <container x="230" y="1660">
+        <othertag type="datetime" />
+    </container>
+</layout>

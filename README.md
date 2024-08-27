@@ -21,6 +21,7 @@ Packages required in system to build the application
 - gstreamer >= 1.24
 - cairo
 - pango
+- pugixml
 
 
 ## Building and testing

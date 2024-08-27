@@ -27,7 +27,7 @@ protected:
     virtual void draw_static_impl(cairo_t* cr);
     virtual void draw_dynamic_impl(cairo_t* cr, void* data);
 
-    utils::logging::logger log{"overlay"};
+    utils::logging::logger log{"widget"};
 
     enum EType {
         EType_Static = 0x1,

@@ -6,6 +6,7 @@ target_sources(vgraph_lib
         string_widget.cpp
         timecode_widget.cpp
         text_align.cpp
+        color.cpp
     PUBLIC
         widget.h
         string_widget.h

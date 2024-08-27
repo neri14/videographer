@@ -10,11 +10,12 @@ struct arguments {
     bool debug = false;
     bool gpu = false;
 
-    std::string telemetry = "";
-    std::optional<double> offset = std::nullopt;
+    std::optional<std::string> telemetry = std::nullopt;
+    std::optional<std::string> layout = std::nullopt;
     std::string input = "";
     std::string output = "";
 
+    std::optional<double> offset = std::nullopt;
     bool timecode = false;
 
     std::pair<int, int> resolution = {3840,2160};
