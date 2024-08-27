@@ -28,8 +28,10 @@ std::shared_ptr<datapoint_sequence> parser::parse(const std::filesystem::path& p
 {
     std::shared_ptr<datapoint_sequence> seq = parse_impl(path);
 
-    update_calculated_fields(seq);
-    print_stats(seq);
+    if (seq) {
+        update_calculated_fields(seq);
+        print_stats(seq);
+    }
 
     return seq;
 }
