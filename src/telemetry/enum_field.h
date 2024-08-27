@@ -9,6 +9,7 @@ enum class EField
     Latitude,
     Longitude,
     Altitude,
+    SmoothAltitude,
     Gradient,
     Temperature,
     Distance,

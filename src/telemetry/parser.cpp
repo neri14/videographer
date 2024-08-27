@@ -1,12 +1,28 @@
 #include "parser.h"
 #include "utils/geo.h"
-#include <deque>
 
 namespace vgraph {
 namespace telemetry {
 namespace consts {
-    double min_dist_gradient(15);// meters in 15s
+    double min_dist_gradient(10);// meters in 10s
 }
+
+struct stats {
+    double min = 0;
+    double max = 0;
+    double avg = 0;
+    int count = 0;
+
+    void add(std::shared_ptr<datapoint>& data, EField field) {
+        if (data->fields.contains(field)) {
+            double val = data->fields.at(field);
+
+            min = count ? std::min(min, val) : val;
+            max = count ? std::max(max, val) : val;
+            avg = avg * (count++)/count + val / count;
+        }
+    }
+};
 
 std::shared_ptr<datapoint_sequence> parser::parse(const std::filesystem::path& path)
 {
@@ -26,26 +42,23 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
 
     std::shared_ptr<datapoint> first = seq->front();
 
-    std::deque<std::shared_ptr<datapoint>> points_15s;
-    std::deque<std::shared_ptr<datapoint>> points_10s;
-    std::deque<std::shared_ptr<datapoint>> points_3s;
+    std::deque<std::shared_ptr<datapoint>> last10s;
+    std::deque<std::shared_ptr<datapoint>> last3s;
     std::shared_ptr<datapoint> last;
 
     for (std::shared_ptr<datapoint>& data : *seq) {
-        points_15s.push_back(data);
-        points_10s.push_back(data);
-        points_3s.push_back(data);
+        // handling of moving time windows
+        last10s.push_back(data);
+        last3s.push_back(data);
 
-        if (points_15s.size() > 10) {
-            points_15s.pop_front();
+        if (last10s.size() > 10) {
+            last10s.pop_front();
         }
-        if (points_10s.size() > 10) {
-            points_10s.pop_front();
-        }
-        if (points_3s.size() > 3) {
-            points_3s.pop_front();
+        if (last3s.size() > 3) {
+            last3s.pop_front();
         }
 
+        // handling track distance
         if (last) {
             total_dist += utils::geo_distance(
                               last->fields.at(EField::Latitude),
@@ -54,24 +67,42 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
                               data->fields.at(EField::Longitude)) / 1000.0;
         }
 
+        // handling distance if not parsed from file
         data->fields[EField::TrackDistance] = total_dist;
         if (!data->fields.contains(EField::Distance)) {
             data->fields[EField::Distance] = total_dist;
         }
+
+        // handling average power and smoothed altitude
+        std::optional<double> power3s = field_avg(last3s, EField::Power);
+        if (power3s) {
+            data->fields[EField::Power3s] = *power3s;
+        }
+        std::optional<double> power10s = field_avg(last10s, EField::Power);
+        if (power10s) {
+            data->fields[EField::Power10s] = *power10s;
+        }
+        std::optional<double> s_alt = field_avg(last10s, EField::Altitude);
+        if (s_alt) {
+            data->fields[EField::SmoothAltitude] = *s_alt;
+        }
+
+        // handling speed if not parsed from file
         if (!data->fields.contains(EField::Speed)) {
             double hours = std::chrono::duration_cast<std::chrono::seconds>((data->timestamp - first->timestamp)).count() / 3600.0;
             data->fields[EField::Speed] = data->fields[EField::Distance] / hours;
         }
-        if (!data->fields.contains(EField::Gradient) && data->fields.contains(EField::Altitude)) {
-            double dist = 1000 * (points_15s.back()->fields[EField::Distance] - points_15s.front()->fields[EField::Distance]);
-            double elev = points_15s.back()->fields[EField::Altitude] - points_15s.front()->fields[EField::Altitude];
+
+        bool calculate_gradient = !data->fields.contains(EField::Gradient) &&
+                                  data->fields.contains(EField::SmoothAltitude) &&
+                                  data->fields.contains(EField::TrackDistance);
+        if (calculate_gradient) {
+            double dist = 1000 * (last10s.back()->fields[EField::TrackDistance] - last10s.front()->fields[EField::TrackDistance]);
             if (dist > consts::min_dist_gradient) {
+                double elev = last10s.back()->fields[EField::SmoothAltitude] - last10s.front()->fields[EField::SmoothAltitude];
                 data->fields[EField::Gradient] = utils::gradient(dist, elev);
             }
         }
-
-            EField::Power3s;//calculate if EField::Power available
-            EField::Power10s;//calculate if EField::Power available
 
         last = data;
     }
@@ -79,32 +110,22 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
 
 void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
 {
-    double altitude = 0;
-    int altitude_cnt =  0;
-
-    double power = 0;
-    int power_cnt =  0;
-
-    double cadence = 0;
-    int cadence_cnt = 0;
-
-    double heartrate = 0;
-    int heartrate_cnt = 0;
-
-    double respiration = 0;
-    int respiration_cnt = 0;
+    stats altitude;
+    stats gradient;
+    stats speed;
+    stats power;
+    stats cadence;
+    stats heartrate;
+    stats respiration;
 
     for (auto data : *seq) {
-        if (data->fields.contains(EField::Altitude))
-            altitude = altitude * (altitude_cnt++)/altitude_cnt + data->fields[EField::Altitude] / altitude_cnt;
-        if (data->fields.contains(EField::Power))
-            power = power * (power_cnt++)/power_cnt + data->fields[EField::Power] / power_cnt;
-        if (data->fields.contains(EField::Cadence))
-            cadence = cadence * (cadence_cnt++)/cadence_cnt + data->fields[EField::Cadence] / cadence_cnt;
-        if (data->fields.contains(EField::HeartRate))
-            heartrate = heartrate * (heartrate_cnt++)/heartrate_cnt + data->fields[EField::HeartRate] / heartrate_cnt;
-        if (data->fields.contains(EField::RespirationRate))
-            respiration = respiration * (respiration_cnt++)/respiration_cnt + data->fields[EField::RespirationRate] / respiration_cnt;
+        altitude.add(data, EField::Altitude);
+        gradient.add(data, EField::Gradient);
+        speed.add(data, EField::Speed);
+        power.add(data, EField::Power);
+        cadence.add(data, EField::Cadence);
+        heartrate.add(data, EField::HeartRate);
+        respiration.add(data, EField::RespirationRate);
     }
 
     auto first = seq->front();
@@ -122,20 +143,34 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     double hours = std::chrono::duration_cast<std::chrono::seconds>((time)).count() / 3600.0;
 
     log.info("Telemetry Statistics:");
-    log.info("                    Time: {:%H:%M:%S}", time);
-    log.info("                Distance: {:7.2f} km", distance);
-    log.info("          Track Distance: {:7.2f} km", track_distance);
-    log.info("           Average Speed: {:7.2f} km/h", distance/hours);
-    if (altitude_cnt)
-        log.info("        Average Altitude: {:7.2f} m", altitude);
-    if (power_cnt)
-        log.info("           Average Power: {:7.2f} W", power);
-    if (cadence_cnt)
-        log.info("         Average Cadence: {:7.2f} rpm", cadence);
-    if (heartrate_cnt)
-        log.info("      Average Heart Rate: {:7.2f} bpm", heartrate);
-    if (respiration_cnt)
-        log.info("Average Respiration Rate: {:7.2f} brpm", respiration);
+    log.info("                        Time: {:%H:%M:%S}", time);
+    log.info("                    Distance: {:7.2f} km", distance);
+    log.info("              Track Distance: {:7.2f} km", track_distance);
+    log.info("           Speed Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} km/h", speed.min,       distance/hours,  speed.max);
+    log.info("        Altitude Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} m",    altitude.min,    altitude.avg,    altitude.max);
+    log.info("        Gradient Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} %",    gradient.min,    gradient.avg,    gradient.max);
+    log.info("           Power Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} W",    power.min,       power.avg,       power.max);
+    log.info("         Cadence Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} rpm",  cadence.min,     cadence.avg,     cadence.max);
+    log.info("      Heart Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} bpm",  heartrate.min,   heartrate.avg,   heartrate.max);
+    log.info("Respiration Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} brpm", respiration.min, respiration.avg, respiration.max);
+}
+
+std::optional<double> parser::field_avg(std::deque<std::shared_ptr<datapoint>> points, EField field)
+{
+    bool ok = false;
+    double sum = 0.0;
+
+    for (std::shared_ptr<datapoint>& data : points) {
+        if (data->fields.contains(field)) {
+            sum += data->fields.at(field);
+            ok = true;
+        }
+    }
+
+    if (ok) {
+        return sum / points.size();
+    }
+    return std::nullopt;
 }
 
 } // namespace telemetry
