@@ -2,6 +2,7 @@
 #define OVERLAY_H
 
 #include "utils/logging/logger.h"
+#include "telemetry/telemetry.h"
 #include "widget/widget.h"
 #include "widget/timecode_widget.h"
 #include "layout.h"
@@ -17,7 +18,7 @@ namespace overlay {
 
 class overlay {
 public:
-    overlay(std::shared_ptr<layout> lay, std::pair<int, int> resolution, bool timecode);
+    overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution, bool timecode);
     ~overlay();
 
     void precache();
@@ -29,8 +30,10 @@ public:
 private:
     utils::logging::logger log{"overlay"};
 
-    void update_dynamic_cache(double timestamp);
+    void update_dynamic_cache(std::shared_ptr<telemetry::datapoint> data);
     void add_widget(std::shared_ptr<widget> ptr);
+
+    std::shared_ptr<telemetry::telemetry> tele_;
 
     long total_drawing_time = 0;
     int total_drawn_frames = 0;
@@ -44,6 +47,8 @@ private:
 
     cairo_surface_t* static_cache;
     cairo_surface_t* dynamic_cache;
+
+    std::shared_ptr<telemetry::datapoint> last_data = nullptr;
 };
 
 } // namespace overlay

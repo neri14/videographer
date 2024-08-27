@@ -56,7 +56,7 @@ void manager::run()
         log.warning("NO LAYOUT FILE PROVIDED - NO DATA-DRIVEN OVERLAY WILL BE GENERATED");
     }
 
-    video::overlay::overlay overlay(lay, args.resolution, args.timecode);
+    video::overlay::overlay overlay(lay, tele, args.resolution, args.timecode);
     overlay.precache();
 
     auto t3 = std::chrono::high_resolution_clock::now();

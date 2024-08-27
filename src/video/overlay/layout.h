@@ -27,7 +27,7 @@ private:
     bool load_widgets(pugi::xml_node node, int x_offset=0, int y_offset=0);
     
     bool create_widget(pugi::xml_node node, int x_offset, int y_offset);
-    bool create_datetime_widget(pugi::xml_node node, int x_offset, int y_offset);
+    bool create_timestamp_widget(pugi::xml_node node, int x_offset, int y_offset);
     bool create_string_widget(pugi::xml_node node, int x_offset, int y_offset);
     bool create_value_widget(pugi::xml_node node, int x_offset, int y_offset);
 
