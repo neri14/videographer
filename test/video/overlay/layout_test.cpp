@@ -13,24 +13,39 @@ namespace consts {
     const std::filesystem::path correct_file = std::filesystem::path(TESTDATA_DIR) / "layout.xml";
 }
 
-TEST(layout_test, load_nonexistant_file_fails)
+class layout_test : public ::testing::Test {
+protected:
+    void SetUp() override
+    {
+        uut = std::make_shared<layout_parser>();
+    }
+
+    void TearDown() override
+    {
+        uut.reset();
+    }
+
+    std::shared_ptr<layout_parser> uut;
+};
+
+TEST_F(layout_test, load_nonexistant_file_fails)
 {
-    EXPECT_EQ(nullptr, load_layout(consts::nonexistant_file));
+    EXPECT_EQ(nullptr, uut->parse(consts::nonexistant_file));
 }
 
-TEST(layout_test, load_empty_xml_fails)
+TEST_F(layout_test, load_empty_xml_fails)
 {
-    EXPECT_EQ(nullptr, load_layout(consts::empty_file));
+    EXPECT_EQ(nullptr, uut->parse(consts::empty_file));
 }
 
-TEST(layout_test, load_different_xml_fails)
+TEST_F(layout_test, load_different_xml_fails)
 {
-    EXPECT_EQ(nullptr, load_layout(consts::different_file));
+    EXPECT_EQ(nullptr, uut->parse(consts::different_file));
 }
 
-TEST(layout_test, load_correct_xml_file)
+TEST_F(layout_test, load_correct_xml_file)
 {
-    EXPECT_NE(nullptr, load_layout(consts::correct_file));
+    EXPECT_NE(nullptr, uut->parse(consts::correct_file));
 }
 
 }
