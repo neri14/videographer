@@ -9,7 +9,6 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-
 layout_parser::layout_parser():
     widgets(std::make_shared<layout>())
 {}
@@ -100,21 +99,28 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
     return false;
 }
 
+layout_parser::common_text_params layout_parser::text_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status)
+{
+    return {
+        mandatory_attribute(node, "x", out_status).as_int() + x_offset,
+        mandatory_attribute(node, "y", out_status).as_int() + y_offset,
+        text_align_from_string(mandatory_attribute(node, "align", out_status).as_string()),
+        mandatory_attribute(node, "font", out_status).as_string(),
+        color_from_string(mandatory_attribute(node, "color", out_status).as_string()),
+        color_from_string(mandatory_attribute(node, "border-color", out_status).as_string()),
+        mandatory_attribute(node, "border-width", out_status).as_int()
+    };
+}
+
 bool layout_parser::create_timestamp_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
     bool status = true;
 
-    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
-    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
-    ETextAlign align = text_align_from_string(mandatory_attribute(node, "align", status).as_string());
-    std::string font = mandatory_attribute(node, "font", status).as_string();
-    rgba color = color_from_string(mandatory_attribute(node, "color", status).as_string());
-    rgba border_color = color_from_string(mandatory_attribute(node, "border-color", status).as_string());
-    int border_width = mandatory_attribute(node, "border-width", status).as_int();
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
     std::string format = mandatory_attribute(node, "format", status).as_string();
     int utcoffset = mandatory_attribute(node, "utcoffset", status).as_int();
 
-    widgets->push_back(std::make_shared<timestamp_widget>(x, y, align, font, color, border_color, border_width, format, utcoffset));
+    widgets->push_back(std::make_shared<timestamp_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, format, utcoffset));
 
     return status;
 }
@@ -123,16 +129,10 @@ bool layout_parser::create_string_widget(pugi::xml_node node, int x_offset, int 
 {
     bool status = true;
 
-    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
-    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
-    ETextAlign align = text_align_from_string(mandatory_attribute(node, "align", status).as_string());
-    std::string font = mandatory_attribute(node, "font", status).as_string();
-    rgba color = color_from_string(mandatory_attribute(node, "color", status).as_string());
-    rgba border_color = color_from_string(mandatory_attribute(node, "border-color", status).as_string());
-    int border_width = mandatory_attribute(node, "border-width", status).as_int();
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
     std::string text = mandatory_attribute(node, "text", status).as_string();
 
-    widgets->push_back(std::make_shared<string_widget>(x, y, align, font, color, border_color, border_width, text));
+    widgets->push_back(std::make_shared<string_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, text));
 
     return status;
 }
