@@ -6,7 +6,6 @@ namespace telemetry {
 
 enum class EField
 {
-    Timestamp,
     Latitude,
     Longitude,
     Altitude,
@@ -15,10 +14,6 @@ enum class EField
     Speed,
     Cadence,
     Power,
-    LeftPedalSmoothness,
-    RightPedalSmoothness,
-    LeftTorqueEffectiveness,
-    RightTorqueEffectiveness,
     RespirationRate,
     HeartRate,
     Grit,
