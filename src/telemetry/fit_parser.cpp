@@ -84,6 +84,8 @@ void fit_parser::handle_record(fit::RecordMesg& record, std::shared_ptr<datapoin
         data->fields[EField::Longitude] = record.GetPositionLong() / consts::magic_lonlat;
     if (record.IsAltitudeValid())
         data->fields[EField::Altitude] = record.GetAltitude();
+    if (record.IsGradeValid())
+        data->fields[EField::Gradient] = record.GetGrade();
     if (record.IsTemperatureValid())
         data->fields[EField::Temperature] = record.GetTemperature();
     if (record.IsDistanceValid())
