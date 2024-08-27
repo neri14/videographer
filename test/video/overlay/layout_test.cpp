@@ -30,22 +30,28 @@ protected:
 
 TEST_F(layout_test, load_nonexistant_file_fails)
 {
-    EXPECT_EQ(nullptr, uut->parse(consts::nonexistant_file));
+    std::shared_ptr<layout> res = uut->parse(consts::nonexistant_file);
+    EXPECT_EQ(nullptr, res);
 }
 
 TEST_F(layout_test, load_empty_xml_fails)
 {
-    EXPECT_EQ(nullptr, uut->parse(consts::empty_file));
+    std::shared_ptr<layout> res = uut->parse(consts::empty_file);
+    EXPECT_EQ(nullptr, res);
 }
 
 TEST_F(layout_test, load_different_xml_fails)
 {
-    EXPECT_EQ(nullptr, uut->parse(consts::different_file));
+    std::shared_ptr<layout> res = uut->parse(consts::different_file);
+    EXPECT_EQ(nullptr, res);
 }
 
 TEST_F(layout_test, load_correct_xml_file)
 {
-    EXPECT_NE(nullptr, uut->parse(consts::correct_file));
+    std::shared_ptr<layout> res = uut->parse(consts::correct_file);
+    EXPECT_NE(nullptr, res);
+
+    EXPECT_EQ(4, res->size());//FIXME 6
 }
 
 }
