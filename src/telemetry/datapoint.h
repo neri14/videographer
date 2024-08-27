@@ -7,11 +7,16 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <chrono>
 
 namespace vgraph {
 namespace telemetry {
 
-using datapoint = std::map<EField, value>;
+struct datapoint {
+    std::chrono::time_point<std::chrono::system_clock> timestamp;
+    std::map<EField, double> fields;
+};
+
 using datapoint_sequence = std::vector<std::shared_ptr<datapoint>>;
 
 } // namespace telemetry

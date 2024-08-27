@@ -42,16 +42,15 @@ TEST_F(fit_parser_test, parse_wrong_file_extension_returns_nullptr)
 TEST_F(fit_parser_test, parse_broken_file_returns_nullptr)
 {
     auto retval = uut->parse(consts::broken_fit_path);
-    ASSERT_NE(nullptr, retval);
+    ASSERT_EQ(nullptr, retval);
 }
 
 TEST_F(fit_parser_test, parse_correct_file_returns_sequence)
 {
-    auto retval = uut->parse(consts::broken_fit_path);
+    auto retval = uut->parse(consts::fit_path);
     ASSERT_NE(nullptr, retval);
 
     //TODO to be implemented
-    
 }
 
 } // namespace telemetry

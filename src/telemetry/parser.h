@@ -3,8 +3,11 @@
 
 #include "datapoint.h"
 
+#include "utils/logging/logger.h"
+
 #include <filesystem>
 #include <memory>
+#include <deque>
 
 namespace vgraph {
 namespace telemetry {
@@ -14,7 +17,18 @@ public:
     parser() = default;
     ~parser() = default;
 
-    virtual std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path) = 0;
+    std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path);
+
+protected:
+    virtual std::shared_ptr<datapoint_sequence> parse_impl(const std::filesystem::path& path) = 0;
+
+private:
+    utils::logging::logger log{"parser"};
+
+    void update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq);
+    void print_stats(std::shared_ptr<datapoint_sequence>& seq);
+
+    std::optional<double> field_avg(std::deque<std::shared_ptr<datapoint>> points, EField field);
 };
 
 } // namespace telemetry
