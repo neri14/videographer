@@ -1,5 +1,7 @@
-#ifndef ENUM_FIELD_H
-#define ENUM_FIELD_H
+#ifndef FIELD_H
+#define FIELD_H
+
+#include <string>
 
 namespace vgraph {
 namespace telemetry {
@@ -23,9 +25,12 @@ enum class EField
     HeartRate,
     Grit,
     Flow,
+    UNDEFINED
 };
+
+EField map_key_to_field(const std::string& key);
 
 } // namespace telemetry
 } // namespace vgraph
 
-#endif // ENUM_FIELD_H
+#endif // FIELD_H

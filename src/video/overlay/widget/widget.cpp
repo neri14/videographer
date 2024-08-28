@@ -21,7 +21,7 @@ void widget::draw_static(cairo_t* cr)
     cairo_restore(cr);
 }
 
-void widget::draw_dynamic(cairo_t* cr, void* data)
+void widget::draw_dynamic(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data)
 {
     if (!dynamic_widget_) {
         log.warning("Called draw_dynamic on widget without dynamic element");
@@ -46,7 +46,7 @@ bool widget::is_dynamic() const
 void widget::draw_static_impl(cairo_t*)
 {/*noop*/}
 
-void widget::draw_dynamic_impl(cairo_t*, void*)
+void widget::draw_dynamic_impl(cairo_t*, std::shared_ptr<telemetry::datapoint>)
 {/*noop*/}
 
 } // namespace overlay

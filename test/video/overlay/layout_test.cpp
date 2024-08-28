@@ -51,7 +51,7 @@ TEST_F(layout_test, load_correct_xml_file)
     std::shared_ptr<layout> res = uut->parse(consts::correct_file);
     EXPECT_NE(nullptr, res);
 
-    EXPECT_EQ(4, res->size());//FIXME 6
+    EXPECT_EQ(11, res->size());
 }
 
 }

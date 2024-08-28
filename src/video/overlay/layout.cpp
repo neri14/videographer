@@ -1,5 +1,7 @@
 #include "layout.h"
 #include "widget/string_widget.h"
+#include "widget/value_widget.h"
+#include "widget/timestamp_widget.h"
 #include "utils/logging/logger.h"
 
 #include <string>
@@ -7,7 +9,6 @@
 namespace vgraph {
 namespace video {
 namespace overlay {
-
 
 layout_parser::layout_parser():
     widgets(std::make_shared<layout>())
@@ -88,7 +89,7 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
     std::string type(node.attribute("type").as_string());
 
     if (type == "datetime") {
-        return create_datetime_widget(node, x_offset, y_offset);
+        return create_timestamp_widget(node, x_offset, y_offset);
     } else if (type == "string") {
         return create_string_widget(node, x_offset, y_offset);
     } else if (type == "value") {
@@ -99,35 +100,52 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
     return false;
 }
 
-bool layout_parser::create_datetime_widget(pugi::xml_node node, int x_offset, int y_offset)
+layout_parser::common_text_params layout_parser::text_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status)
 {
-    //TODO layout_parser::create_datetime_widget(pugi::xml_node node)
-    log.warning("Not yet implemented: layout_parser::create_datetime_widget");
-    return true;
+    return {
+        mandatory_attribute(node, "x", out_status).as_int() + x_offset,
+        mandatory_attribute(node, "y", out_status).as_int() + y_offset,
+        text_align_from_string(mandatory_attribute(node, "align", out_status).as_string()),
+        mandatory_attribute(node, "font", out_status).as_string(),
+        color_from_string(mandatory_attribute(node, "color", out_status).as_string()),
+        color_from_string(mandatory_attribute(node, "border-color", out_status).as_string()),
+        mandatory_attribute(node, "border-width", out_status).as_int()
+    };
+}
+
+bool layout_parser::create_timestamp_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
+    std::string format = mandatory_attribute(node, "format", status).as_string();
+    int utcoffset = mandatory_attribute(node, "utcoffset", status).as_int();
+
+    widgets->push_back(std::make_shared<timestamp_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, format, utcoffset));
+
+    return status;
 }
 
 bool layout_parser::create_string_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
-// int x, int y, const std::string& text, const std::string& font, const rgba& color, const rgba& border_color, int border_width, ETextAlign align
     bool status = true;
 
-    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
-    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
     std::string text = mandatory_attribute(node, "text", status).as_string();
-    std::string font = mandatory_attribute(node, "font", status).as_string();
-    rgba color = color_from_string(mandatory_attribute(node, "color", status).as_string());
-    rgba border_color = color_from_string(mandatory_attribute(node, "border-color", status).as_string());
-    int border_width = mandatory_attribute(node, "border-width", status).as_int();
-    ETextAlign align = text_align_from_string(mandatory_attribute(node, "align", status).as_string());
 
-    widgets->push_back(std::make_shared<string_widget>(x, y, text, font, color, border_color, border_width, align));
+    widgets->push_back(std::make_shared<string_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, text));
 
     return status;
 }
 
 bool layout_parser::create_value_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
-    //TODO layout_parser::create_value_widget(pugi::xml_node node)
+    bool status = true;
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
+    std::string key = mandatory_attribute(node, "key", status).as_string();
+    int precision = mandatory_attribute(node, "precision", status).as_int();
+
+    widgets->push_back(std::make_shared<value_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, key, precision));
     log.warning("Not yet implemented: layout_parser::create_value_widget");
     return true;
 }

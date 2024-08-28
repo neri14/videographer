@@ -20,7 +20,9 @@ public:
 
 private:
     utils::logging::logger log{"telemetry"};
-    long offset_; // offset in microseconds
+
+    long avg_interval = 0;
+    std::map<long, std::shared_ptr<datapoint>> points;
 };
 
 } // namespace telemetry

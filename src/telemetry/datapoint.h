@@ -1,7 +1,7 @@
 #ifndef DATAPOINT_H
 #define DATAPOINT_H
 
-#include "enum_field.h"
+#include "field.h"
 #include "value.h"
 
 #include <map>

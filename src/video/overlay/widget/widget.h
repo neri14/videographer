@@ -2,6 +2,7 @@
 #define WIDGET_H
 
 #include "utils/logging/logger.h"
+#include "telemetry/datapoint.h"
 
 extern "C" {
     #include <cairo.h>
@@ -16,7 +17,7 @@ public:
     virtual ~widget() = default;
 
     void draw_static(cairo_t* cr);
-    void draw_dynamic(cairo_t* cr, void* data); //FIXME void* data for future telemetry datapoint
+    void draw_dynamic(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data);
 
     bool is_static() const;
     bool is_dynamic() const;
@@ -25,9 +26,7 @@ protected:
     widget(unsigned int type); // defined by bitwise or of EType values
 
     virtual void draw_static_impl(cairo_t* cr);
-    virtual void draw_dynamic_impl(cairo_t* cr, void* data);
-
-    utils::logging::logger log{"widget"};
+    virtual void draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data);
 
     enum EType {
         EType_Static = 0x1,
@@ -35,6 +34,7 @@ protected:
     };
 
 private:
+    utils::logging::logger log{"widget"};
     bool static_widget_;
     bool dynamic_widget_;
 };

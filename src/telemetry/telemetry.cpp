@@ -11,30 +11,46 @@ namespace helper {
     }
 }
 
-telemetry::telemetry(std::shared_ptr<datapoint_sequence> seq, long offset):
-    offset_(offset)
+telemetry::telemetry(std::shared_ptr<datapoint_sequence> seq, long offset)
 {
     if (!seq) {
         log.warning("No telemetry loaded");
         return;
     }
 
-    for (auto& dp : *seq) {
-        //TODO parse into internal representation keyed on usecond timestamps
-        //TODO store averge time between points (for last point retreiveal logic)
+    auto first_timestamp = seq->front()->timestamp;
+    auto prev_timestamp = seq->front()->timestamp;
+
+    long sum = 0;
+    
+    bool first = true;
+    for (auto& data : *seq) {
+        long us = std::chrono::duration_cast<std::chrono::microseconds>(data->timestamp - first_timestamp).count();
+        points[us+offset] = data;
+
+        if (!first) {
+            sum += std::chrono::duration_cast<std::chrono::microseconds>(data->timestamp - prev_timestamp).count();
+        }
+
+        prev_timestamp = data->timestamp;
+        first = false;
     }
+
+    avg_interval = first / seq->size();
 }
 
 std::shared_ptr<datapoint> telemetry::get(double timestamp) const
 {
-    //TODO retrieval of datapoint from internal representation to be implemented
-    // if before first_point:
-    //     return nullptr;
-    // if last_point and (argument::timestamp - last_point.timestamp) > average_time_between_points:
-    //     return nullptr;
-    // else:
-    //     return point with greatest point.timestamp where: point.timestamp <= argument::timestamp
-    return nullptr;
+    long us = helper::in_microseconds(timestamp);
+
+    if (points.begin()->first > us) {
+        return nullptr;
+    }
+    if (points.rbegin()->first + avg_interval < us) {
+        return nullptr;
+    }
+
+    return (--points.lower_bound(us))->second;
 }
 
 std::shared_ptr<telemetry> telemetry::load(const std::string& path, std::optional<double> offset)
