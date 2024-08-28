@@ -1,5 +1,6 @@
 #include "layout.h"
 #include "widget/string_widget.h"
+#include "widget/value_widget.h"
 #include "widget/timestamp_widget.h"
 #include "utils/logging/logger.h"
 
@@ -139,7 +140,12 @@ bool layout_parser::create_string_widget(pugi::xml_node node, int x_offset, int 
 
 bool layout_parser::create_value_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
-    //TODO layout_parser::create_value_widget(pugi::xml_node node)
+    bool status = true;
+    common_text_params txt = text_params(node, x_offset, y_offset, status);
+    std::string key = mandatory_attribute(node, "key", status).as_string();
+    int precision = mandatory_attribute(node, "precision", status).as_int();
+
+    widgets->push_back(std::make_shared<value_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, key, precision));
     log.warning("Not yet implemented: layout_parser::create_value_widget");
     return true;
 }

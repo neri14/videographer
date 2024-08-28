@@ -2,10 +2,6 @@
 #define STRING_WIDGET_H
 
 #include "text_widget.h"
-#include "color.h"
-#include "text_align.h"
-
-#include <string>
 
 namespace vgraph {
 namespace video {
