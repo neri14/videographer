@@ -7,6 +7,7 @@ target_sources(vgraph_lib
         string_widget.cpp
         value_widget.cpp
         timestamp_widget.cpp
+        chart_widget.cpp
         timecode_widget.cpp
         text_align.cpp
         color.cpp
@@ -16,6 +17,7 @@ target_sources(vgraph_lib
         string_widget.h
         value_widget.h
         timestamp_widget.h
+        chart_widget.h
         timecode_widget.h
         text_align.h
         color.h
