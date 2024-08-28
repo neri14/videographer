@@ -11,6 +11,7 @@ namespace overlay {
 
 overlay::overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution, bool timecode):
     tele_(tele),
+    layout_(*lay),
     width(resolution.first),
     height(resolution.second)
 {
@@ -49,12 +50,14 @@ void overlay::precache()
 {
     auto t1 = std::chrono::high_resolution_clock::now();
 
-    cairo_t* cr = cairo_create(static_cache);
+    for (auto w : layout_) {
+        w->prepare(tele_->get_all());
+    }
 
+    cairo_t* cr = cairo_create(static_cache);
     for (auto w : static_widgets_) {
         w->draw_static(cr);
     }
-
     cairo_destroy(cr);
 
     auto t2 = std::chrono::high_resolution_clock::now();

@@ -10,7 +10,7 @@
     <!-- charts -->
     <container x="2990" y="50">
         <widget type="map" x="0" y="0" width="800" height="800" line-color="white" line-width="6" point-color="red" point-size="14" />
-        <widget type="chart" x="0" y="850" width="800" height="800" line-color="white" line-width="4" point-color="red" point-size="12" x-key="distance" y-key="smooth_altitude" />
+        <widget type="chart" x="0" y="850" width="800" height="100" line-color="white" line-width="4" point-color="red" point-size="12" x-key="distance" y-key="smooth_altitude" />
     </container>
 
     <!-- left column -->

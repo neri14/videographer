@@ -13,10 +13,6 @@ rgba color_from_string(const std::string& str)
 
     utils::logging::logger{"text_align_from_string"}.warning("Unsupported color \"{}\" provided, falling back to white", str);
     return color::white;
-
-    // FIXME hex value parsing like #ababab
-
-    // FIXME three int value parsing like (0,0,0) or  (0,0,0,0)
 }
 
 } // namespace overlay

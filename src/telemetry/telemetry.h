@@ -15,6 +15,7 @@ public:
     ~telemetry() = default;
 
     std::shared_ptr<datapoint> get(double timestamp) const;
+    const std::vector<std::shared_ptr<datapoint>>& get_all() const;
 
     static std::shared_ptr<telemetry> load(const std::string& path, std::optional<double> offset); // optional offset in seconds
 
@@ -22,7 +23,9 @@ private:
     utils::logging::logger log{"telemetry"};
 
     long avg_interval = 0;
-    std::map<long, std::shared_ptr<datapoint>> points;
+
+    std::vector<std::shared_ptr<datapoint>> points;
+    std::map<long, std::shared_ptr<datapoint>> time_points;
 };
 
 } // namespace telemetry

@@ -157,8 +157,8 @@ bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y
 {
     bool status = true;
 
-    int x = mandatory_attribute(node, "x", status).as_int();
-    int y = mandatory_attribute(node, "y", status).as_int();
+    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
+    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
     int width = mandatory_attribute(node, "width", status).as_int();
     int height = mandatory_attribute(node, "height", status).as_int();
     rgba line_color = color_from_string(mandatory_attribute(node, "line-color", status).as_string());

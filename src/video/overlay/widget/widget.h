@@ -3,6 +3,7 @@
 
 #include "utils/logging/logger.h"
 #include "telemetry/datapoint.h"
+#include "telemetry/telemetry.h"
 
 extern "C" {
     #include <cairo.h>
@@ -15,6 +16,8 @@ namespace overlay {
 class widget {
 public:
     virtual ~widget() = default;
+
+    virtual void prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& points);
 
     void draw_static(cairo_t* cr);
     void draw_dynamic(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data);
