@@ -94,6 +94,10 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return create_string_widget(node, x_offset, y_offset);
     } else if (type == "value") {
         return create_value_widget(node, x_offset, y_offset);
+    } else if (type == "chart") {
+        return create_chart_widget(node, x_offset, y_offset);
+    } else if (type == "map") {
+        return create_map_widget(node, x_offset, y_offset);
     }
 
     log.error("Unknown widget type \"{}\"", type);
@@ -146,7 +150,18 @@ bool layout_parser::create_value_widget(pugi::xml_node node, int x_offset, int y
     int precision = mandatory_attribute(node, "precision", status).as_int();
 
     widgets->push_back(std::make_shared<value_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, key, precision));
-    log.warning("Not yet implemented: layout_parser::create_value_widget");
+    return true;
+}
+
+bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    log.warning("Not yet implemented: layout_parser::create_chart_widget");
+    return true;
+}
+
+bool layout_parser::create_map_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    log.warning("Not yet implemented: layout_parser::create_map_widget");
     return true;
 }
 

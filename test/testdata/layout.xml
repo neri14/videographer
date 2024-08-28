@@ -2,12 +2,16 @@
 <!-- align: Left means widget's left edge is at x, Center means widget's center is at x, Right means widget's right edge is at x -->
 
 <layout>
+    <!-- timestamp -->
     <widget type="datetime" x="10" y="10" align="left" font="DejaVu Sans 32"
             color="white" border-color="black" border-width="2"
             format="%Y-%m-%d %H:%M:%S" utcoffset="120" />
 
-    <!-- TODO: <widget type="map"/> -->
-    <!-- TODO: <widget type="chart"/> -->
+    <!-- charts -->
+    <container x="2990" y="50">
+        <widget type="map" x="0" y="0" width="800" height="800" line-color="white" line-width="6" point-color="red" point-size="14" />
+        <widget type="chart" x="0" y="850" width="800" height="800" line-color="white" line-width="4" point-color="red" point-size="12" y-key="distance" x-key="smooth_altitude" />
+    </container>
 
     <!-- left column -->
     <container x="230" y="1660">

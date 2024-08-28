@@ -36,9 +36,9 @@ Packages required in system to build the application
 
 1. Get video and telemetry
 1. Run concat tool to combine the clips
-1. Run trim tool to get final base video
+1. Run trim tool to create final raw video
 1. Run alignment tool and figure out offset
-1. Run generator app to generate base video (upscaled to 4K for YT)
+1. Run generator app to generate final video (for YT - set upscale to 4K (```-r 3840x2160```))
 1. Upload
 
 
