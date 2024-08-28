@@ -11,7 +11,8 @@ namespace helper {
     }
 }
 
-telemetry::telemetry(std::shared_ptr<datapoint_sequence> seq, long offset)
+telemetry::telemetry(std::shared_ptr<datapoint_sequence> seq, long offset) :
+    points(*seq)
 {
     if (!seq) {
         log.warning("No telemetry loaded");
@@ -26,7 +27,7 @@ telemetry::telemetry(std::shared_ptr<datapoint_sequence> seq, long offset)
     bool first = true;
     for (auto& data : *seq) {
         long us = std::chrono::duration_cast<std::chrono::microseconds>(data->timestamp - first_timestamp).count();
-        points[us+offset] = data;
+        time_points[us+offset] = data;
 
         if (!first) {
             sum += std::chrono::duration_cast<std::chrono::microseconds>(data->timestamp - prev_timestamp).count();
@@ -43,14 +44,19 @@ std::shared_ptr<datapoint> telemetry::get(double timestamp) const
 {
     long us = helper::in_microseconds(timestamp);
 
-    if (points.begin()->first > us) {
+    if (time_points.begin()->first > us) {
         return nullptr;
     }
-    if (points.rbegin()->first + avg_interval < us) {
+    if (time_points.rbegin()->first + avg_interval < us) {
         return nullptr;
     }
 
-    return (--points.lower_bound(us))->second;
+    return (--time_points.lower_bound(us))->second;
+}
+
+const std::vector<std::shared_ptr<datapoint>>& telemetry::get_all() const
+{
+    return points;
 }
 
 std::shared_ptr<telemetry> telemetry::load(const std::string& path, std::optional<double> offset)

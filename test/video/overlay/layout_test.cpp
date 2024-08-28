@@ -51,7 +51,7 @@ TEST_F(layout_test, load_correct_xml_file)
     std::shared_ptr<layout> res = uut->parse(consts::correct_file);
     EXPECT_NE(nullptr, res);
 
-    EXPECT_EQ(11, res->size());
+    EXPECT_EQ(13, res->size());
 }
 
 }

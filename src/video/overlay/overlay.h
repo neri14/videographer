@@ -41,6 +41,8 @@ private:
     int cache_hit = 0;
     int cache_miss = 0;
 
+    std::vector<std::shared_ptr<widget>> layout_;
+
     std::vector<std::shared_ptr<widget>> static_widgets_;
     std::vector<std::shared_ptr<widget>> dynamic_widgets_;
     std::shared_ptr<timecode_widget> tc_widget_;

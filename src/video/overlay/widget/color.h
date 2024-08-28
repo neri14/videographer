@@ -19,10 +19,12 @@ using rgb = rgba;
 namespace color {
     const rgb white{1.0, 1.0, 1.0};
     const rgb black{0.0, 0.0, 0.0};
+    const rgb red  {1.0, 0.0, 0.0};
 
     const std::map<std::string, rgba> map = {
         {"white", color::white},
-        {"black", color::black}
+        {"black", color::black},
+        {"red"  , color::red}
     };
 }
 

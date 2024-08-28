@@ -9,6 +9,9 @@ widget::widget(unsigned int type):
     dynamic_widget_(type & EType_Dynamic)
 {}
 
+void widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>&)
+{/*noop*/}
+
 void widget::draw_static(cairo_t* cr)
 {
     if (!static_widget_) {

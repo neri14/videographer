@@ -2,6 +2,8 @@
 #include "widget/string_widget.h"
 #include "widget/value_widget.h"
 #include "widget/timestamp_widget.h"
+#include "widget/chart_widget.h"
+#include "widget/map_widget.h"
 #include "utils/logging/logger.h"
 
 #include <string>
@@ -94,6 +96,10 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return create_string_widget(node, x_offset, y_offset);
     } else if (type == "value") {
         return create_value_widget(node, x_offset, y_offset);
+    } else if (type == "chart") {
+        return create_chart_widget(node, x_offset, y_offset);
+    } else if (type == "map") {
+        return create_map_widget(node, x_offset, y_offset);
     }
 
     log.error("Unknown widget type \"{}\"", type);
@@ -113,16 +119,29 @@ layout_parser::common_text_params layout_parser::text_params(pugi::xml_node node
     };
 }
 
+layout_parser::common_chart_params layout_parser::chart_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status)
+{
+    return {
+        mandatory_attribute(node, "x", out_status).as_int() + x_offset,
+        mandatory_attribute(node, "y", out_status).as_int() + y_offset,
+        mandatory_attribute(node, "width", out_status).as_int(),
+        mandatory_attribute(node, "height", out_status).as_int(),
+        color_from_string(mandatory_attribute(node, "line-color", out_status).as_string()),
+        mandatory_attribute(node, "line-width", out_status).as_int(),
+        color_from_string(mandatory_attribute(node, "point-color", out_status).as_string()),
+        mandatory_attribute(node, "point-size", out_status).as_int()
+    };
+}
+
 bool layout_parser::create_timestamp_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
     bool status = true;
 
-    common_text_params txt = text_params(node, x_offset, y_offset, status);
+    auto txt = text_params(node, x_offset, y_offset, status);
     std::string format = mandatory_attribute(node, "format", status).as_string();
     int utcoffset = mandatory_attribute(node, "utcoffset", status).as_int();
 
     widgets->push_back(std::make_shared<timestamp_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, format, utcoffset));
-
     return status;
 }
 
@@ -130,24 +149,45 @@ bool layout_parser::create_string_widget(pugi::xml_node node, int x_offset, int 
 {
     bool status = true;
 
-    common_text_params txt = text_params(node, x_offset, y_offset, status);
+    auto txt = text_params(node, x_offset, y_offset, status);
     std::string text = mandatory_attribute(node, "text", status).as_string();
 
     widgets->push_back(std::make_shared<string_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, text));
-
     return status;
 }
 
 bool layout_parser::create_value_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
     bool status = true;
-    common_text_params txt = text_params(node, x_offset, y_offset, status);
+
+    auto txt = text_params(node, x_offset, y_offset, status);
     std::string key = mandatory_attribute(node, "key", status).as_string();
     int precision = mandatory_attribute(node, "precision", status).as_int();
 
     widgets->push_back(std::make_shared<value_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, key, precision));
-    log.warning("Not yet implemented: layout_parser::create_value_widget");
-    return true;
+    return status;
+}
+
+bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    auto chrt = chart_params(node, x_offset, y_offset, status);
+    std::string x_key = mandatory_attribute(node, "x-key", status).as_string();
+    std::string y_key = mandatory_attribute(node, "y-key", status).as_string();
+
+    widgets->push_back(std::make_shared<chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, x_key, y_key));
+    return status;
+}
+
+bool layout_parser::create_map_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    auto chrt = chart_params(node, x_offset, y_offset, status);
+
+    widgets->push_back(std::make_shared<map_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size));
+    return status;
 }
 
 pugi::xml_attribute layout_parser::mandatory_attribute(pugi::xml_node node, const std::string& attr_name, bool& out_status)
