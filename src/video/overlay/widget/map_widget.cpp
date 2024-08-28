@@ -1,15 +1,24 @@
-#include "chart_widget.h"
+#include "map_widget.h"
 
+#include "telemetry/field.h"
+
+#include <numbers>
 #include <cmath>
 
 namespace vgraph {
 namespace video {
 namespace overlay {
+namespace consts {
+    const double mercator_w(36000.0);
+    const double mercator_h(18000.0);
 
-chart_widget::chart_widget(int x, int y, int width, int height,
-                           const rgba& line_color, int line_width,
-                           const rgba& point_color, int point_size,
-                           const std::string& x_key, const std::string& y_key) :
+    const telemetry::EField x_field(telemetry::EField::Longitude);
+    const telemetry::EField y_field(telemetry::EField::Latitude);
+}
+
+map_widget::map_widget(int x, int y, int width, int height,
+                       const rgba& line_color, int line_width,
+                       const rgba& point_color, int point_size) :
     widget(EType_Static|EType_Dynamic),
     x_(x),
     y_(y),
@@ -18,24 +27,21 @@ chart_widget::chart_widget(int x, int y, int width, int height,
     line_color_(line_color),
     line_width_(line_width),
     point_color_(point_color),
-    point_radius_(point_size/2.0),
-    x_field_(telemetry::map_key_to_field(x_key)),
-    y_field_(telemetry::map_key_to_field(y_key))
+    point_radius_(point_size/2.0)
 {
-    log.debug("Created chart widget");
+    log.debug("Created map widget");
 }
 
-chart_widget::~chart_widget()
+map_widget::~map_widget()
 {}
 
-void chart_widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& datapoints)
+void map_widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& datapoints)
 {
-    log.debug("Preloading chart");
+    log.debug("Preloading map");
 
     for (auto data : datapoints) {
-        if (data->fields.contains(x_field_) && data->fields.contains(y_field_)) {
-            double x = data->fields.at(x_field_);
-            double y = data->fields.at(y_field_);
+        if (data->fields.contains(consts::x_field) && data->fields.contains(consts::y_field)) {
+            auto [x,y] = project(data->fields.at(consts::x_field), data->fields.at(consts::y_field));
 
             min_x = std::min(min_x, x);
             max_x = std::max(max_x, x);
@@ -49,16 +55,16 @@ void chart_widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoin
 
     if (min_x < max_x && min_y < max_y) {
         scale_x = width_/(max_x-min_x);
-        scale_y = -1 * height_/(max_y-min_y);
+        scale_y = height_/(max_y-min_y);
 
         valid = true;
         log.debug("Prepared data for generating widget");
     } else {
-        log.warning("Not enough data points with data for charting");
+        log.warning("Not enough data points with data for creating a map");
     }
 }
 
-void chart_widget::draw_static_impl(cairo_t* cr)
+void map_widget::draw_static_impl(cairo_t* cr)
 {
     if (!valid) {
         log.warning("Invalid widget state - ignoring");
@@ -89,19 +95,10 @@ void chart_widget::draw_static_impl(cairo_t* cr)
     cairo_stroke(cr);
 }
 
-void chart_widget::draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data)
+void map_widget::draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data)
 {
-    static bool valid = false;
-    static double fx;
-    static double fy;
-
-    if (data->fields.contains(x_field_) && data->fields.contains(y_field_)) {
-        fx = data->fields.at(x_field_);
-        fy = data->fields.at(y_field_);
-        valid = true;
-    }
-
-    if (valid) {
+    if (data->fields.contains(consts::x_field) && data->fields.contains(consts::y_field)) {
+        auto [fx,fy] = project(data->fields.at(consts::x_field), data->fields.at(consts::y_field));
         auto [x,y] = translate_xy(fx, fy);
 
         cairo_move_to(cr, x, y + point_radius_);
@@ -112,11 +109,21 @@ void chart_widget::draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::dat
     }
 }
 
-std::pair<int, int> chart_widget::translate_xy(double x, double y)
+std::pair<int, int> map_widget::translate_xy(double x, double y)
 {
     return std::make_pair(static_cast<int>(std::round(((x-min_x)*scale_x) + x_)),
-                          static_cast<int>(std::round(((y-min_y)*scale_y) + y_ + height_)));
+                          static_cast<int>(std::round(((y-min_y)*scale_y) + y_)));
+}
 
+std::pair<double, double> map_widget::project(double x, double y)
+{
+    x = (x + 180) * (consts::mercator_w / 360);
+    
+    double lat_rad = y * std::numbers::pi / 180;
+    double merc_n = std::log(std::tan((std::numbers::pi/4)+(lat_rad/2)));
+    y = consts::mercator_h / 2 - consts::mercator_w * merc_n / (2 * std::numbers::pi);
+
+    return std::make_pair(x, y);
 }
 
 } // namespace overlay

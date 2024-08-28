@@ -1,5 +1,5 @@
-#ifndef CHART_WIDGET_H
-#define CHART_WIDGET_H
+#ifndef MAP_WIDGET_H
+#define MAP_WIDGET_H
 
 #include "widget.h"
 #include "color.h"
@@ -11,22 +11,22 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-class chart_widget: public widget {
+class map_widget: public widget {
 public:
-    chart_widget(int x, int y, int width, int height,
+    map_widget(int x, int y, int width, int height,
                  const rgba& line_color, int line_width,
-                 const rgba& point_color, int point_size,
-                 const std::string& x_key, const std::string& y_key);
-    ~chart_widget();
+                 const rgba& point_color, int point_size);
+    ~map_widget();
 
     void prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& datapoints) override;
 
 private:
-    utils::logging::logger log{"chart_widget"};
+    utils::logging::logger log{"map_widget"};
 
     void draw_static_impl(cairo_t* cr) override;
     void draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data) override;
 
+    std::pair<double, double> project(double x, double y);
     std::pair<int, int> translate_xy(double x, double y);
 
     int x_;
@@ -39,8 +39,6 @@ private:
     double point_radius_;
     std::string x_key_;
     std::string y_key_;
-    telemetry::EField x_field_;
-    telemetry::EField y_field_;
 
     std::vector<std::pair<double, double>> points;
 
@@ -58,4 +56,4 @@ private:
 } // namespace video
 } // namespace vgraph
 
-#endif // CHART_WIDGET_H
+#endif // MAP_WIDGET_H

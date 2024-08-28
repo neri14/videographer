@@ -25,6 +25,7 @@ public:
 
 private:
     struct common_text_params;
+    struct common_chart_params;
 
     utils::logging::logger log{"layout::load"};
 
@@ -38,6 +39,7 @@ private:
     bool create_map_widget(pugi::xml_node node, int x_offset, int y_offset);
 
     common_text_params text_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status);
+    common_chart_params chart_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status);
     pugi::xml_attribute mandatory_attribute(pugi::xml_node node, const std::string& attr_name, bool& out_status);
 
     std::shared_ptr<layout> widgets;
@@ -52,6 +54,17 @@ struct layout_parser::common_text_params{
     rgba color;
     rgba border_color;
     int border_width;
+};
+
+struct layout_parser::common_chart_params{
+    int x;
+    int y;
+    int width;
+    int height;
+    rgba line_color;
+    int line_width;
+    rgba point_color;
+    int point_size;
 };
 
 } // namespace overlay
