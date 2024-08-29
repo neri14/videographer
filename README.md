@@ -30,7 +30,7 @@
 
    example ffmpeg command: ```ffmpeg -ss 00:00:30.0 -to 00:01:00.0 -i input.mp4 -c copy output.mp4```
 
-1. Run alignment tool and figure out offset (tool instruction below - functionality to be integrated into main generator (#21))
+1. Run alignment tool and figure out offset (tool instruction below; functionality to be integrated into main generator https://github.com/neri14/videographer/issues/21)
 
 1. Run generator app to generate final video
 
