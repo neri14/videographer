@@ -13,12 +13,30 @@
 
 ## Pipeline
 
-1. Get video and telemetry
-1. Run concat tool to combine the clips
-1. Run trim tool to create final raw video
-1. Run alignment tool and figure out offset
-1. Run generator app to generate final video (for YT - set upscale to 4K (```-r 3840x2160```))
-1. Upload
+1. Gather video clips (.mp4) and telemetry file (.fit) to be used
+
+1. Concatenate video clips
+
+   example ffmpeg command: ```ffmpeg -f concat -safe 0 -i mylist.txt -c copy output.mp4```
+
+   with ```mylist.txt``` content:
+   ```
+   file '/path/to/clip/1.mp4'
+   file '/path/to/clip/2.mp4'
+   file '/path/to/clip/3.mp4'
+   ```
+
+1. Trim concatenated video
+
+   example ffmpeg command: ```ffmpeg -ss 00:00:30.0 -to 00:01:00.0 -i input.mp4 -c copy output.mp4```
+
+1. Run alignment tool and figure out offset (tool instruction below - functionality to be integrated into main generator (#21))
+
+1. Run generator app to generate final video
+
+   > for YT - use upscale to 4K and 80mbit/s bitrate (```-r 3840x2160 -b 80000```)
+
+1. Upload video
 
 
 ## Dependencies
