@@ -31,24 +31,24 @@ protected:
 
 TEST_F(fit_parser_test, parse_incorrect_path_returns_nullptr)
 {
-    ASSERT_EQ(nullptr, uut->parse(consts::nonexistant_path));
+    ASSERT_EQ(0, uut->parse(consts::nonexistant_path).size());
 }
 
 TEST_F(fit_parser_test, parse_wrong_file_extension_returns_nullptr)
 {
-    ASSERT_EQ(nullptr, uut->parse(consts::gpx_path));
+    ASSERT_EQ(0, uut->parse(consts::gpx_path).size());
 }
 
 TEST_F(fit_parser_test, parse_broken_file_returns_nullptr)
 {
-    auto retval = uut->parse(consts::broken_fit_path);
-    ASSERT_EQ(nullptr, retval);
+    auto retval = uut->parse(consts::broken_fit_path).size();
+    ASSERT_EQ(0, retval);
 }
 
 TEST_F(fit_parser_test, parse_correct_file_returns_sequence)
 {
-    auto retval = uut->parse(consts::fit_path);
-    ASSERT_NE(nullptr, retval);
+    auto retval = uut->parse(consts::fit_path).size();
+    ASSERT_NE(0, retval);
 }
 
 } // namespace telemetry

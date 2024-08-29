@@ -2,6 +2,8 @@
 #include "utils/geo.h"
 
 #include <ranges>
+#include <map>
+#include <cmath>
 
 namespace vgraph {
 namespace telemetry {
@@ -9,10 +11,17 @@ namespace consts {
     double min_dist_gradient(10);// meters in 10s
 
     // gradient windows in meters
-    double gradient_window_behind(0.015);
-    double gradient_window_ahead(0.005);
-    double gradient_cap_window_behind(gradient_window_behind*4);
-    double gradient_cap_window_ahead(gradient_window_ahead*4);
+    int gradient_window_behind(15);
+    int gradient_window_ahead(15);
+    int gradient_cap_window_behind(gradient_window_behind*4);
+    int gradient_cap_window_ahead(gradient_window_ahead*4);
+}
+namespace helper {
+    int km_to_m(double km)
+    {
+        return static_cast<int>(std::round(km*1000));
+    }
+
 }
 
 struct stats {
@@ -52,6 +61,7 @@ void parser::update_calculated_fields(datapoint_seq& seq)
     datapoint_ptr last = first;
 
     double track_dist = 0;
+    std::multimap<int, datapoint_ptr> seq_by_dist;
 
     for (auto it = seq.begin(); it != seq.end(); it++) {
         datapoint_ptr& data = *it;
@@ -77,15 +87,24 @@ void parser::update_calculated_fields(datapoint_seq& seq)
         }
 
         // setting time averaged fields
-        set_if_ok(*it, EField::Power3s,        field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,     3));
-        set_if_ok(*it, EField::Power10s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    10));
-        set_if_ok(*it, EField::Power30s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    30));
-        set_if_ok(*it, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Altitude, 10));
+        set_if_ok(data, EField::Power3s,        field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,     3));
+        set_if_ok(data, EField::Power10s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    10));
+        set_if_ok(data, EField::Power30s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    30));
+        set_if_ok(data, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Altitude, 10));
 
-        // calculate gradient
+        // store point into sequence by distance
+        seq_by_dist.insert(std::make_pair(helper::km_to_m(data->fields.at(EField::Distance)), data));
+
+        // store last point
+        last = data;
+    }
+
+    log.info("Calculating gradients");
+    for (datapoint_ptr& data : seq) {
         if (!data->fields.contains(EField::Gradient) && data->fields.contains(EField::SmoothAltitude)) {
-            double grad = gradient_between(seq, track_dist - consts::gradient_window_behind, track_dist + consts::gradient_window_ahead);
-            double cap = gradient_between(seq, track_dist - consts::gradient_cap_window_behind, track_dist + consts::gradient_cap_window_ahead);
+            int dst_m = helper::km_to_m(data->fields.at(EField::Distance));
+            double grad = gradient_between(seq_by_dist, dst_m - consts::gradient_window_behind,     dst_m + consts::gradient_window_ahead);
+            double cap  = gradient_between(seq_by_dist, dst_m - consts::gradient_cap_window_behind, dst_m + consts::gradient_cap_window_ahead);
 
             if (std::abs(grad) > std::abs(cap)) {
                 grad = grad*cap > 0 ? cap : -cap; 
@@ -94,9 +113,6 @@ void parser::update_calculated_fields(datapoint_seq& seq)
 
             data->fields[EField::Gradient] = grad*100;//convert to pct
         }
-
-        // store last point
-        last = data;
     }
 }
 
@@ -144,23 +160,44 @@ void parser::print_stats(datapoint_seq& seq)
     log.info("Respiration Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} brpm", respiration.min, respiration.avg, respiration.max);
 }
 
-double parser::gradient_between(const datapoint_seq& seq, double dist_a, double dist_b)
+double parser::gradient_between(const std::multimap<int, datapoint_ptr>& dist_points, int dist_a, int dist_b)
 {
-    if (dist_a <= dist_b) {
+    if (dist_a >= dist_b) {
         return 0;
     }
 
-    double alt_a = get_by_distance(seq, dist_a, EField::Altitude).back();
-    double alt_b = get_by_distance(seq, dist_b, EField::Altitude).front();
+    double alt_a = get_by_distance(dist_points, dist_a, EField::SmoothAltitude);
+    double alt_b = get_by_distance(dist_points, dist_b, EField::SmoothAltitude);
 
-    return (alt_b - alt_a)/((dist_b - dist_a)*1000);
+    double grad = (alt_b - alt_a)/(dist_b - dist_a);
+    return grad;
 }
 
-std::vector<double> parser::get_by_distance(const datapoint_seq& seq, double dist, EField field)
+double parser::get_by_distance(const std::multimap<int, datapoint_ptr>& dist_points, int dist, EField field, bool last)
 {
     std::vector<double> res;
-    //TODO
-    return std::move(res);
+
+    double ret = 0;
+
+    if (dist_points.contains(dist)) {
+        auto [it1, it2] = dist_points.equal_range(dist);
+
+        if (last) {
+            ret = (--it2)->second->fields.at(field);
+        } else {
+            ret = it1->second->fields.at(field);
+        }
+    } else {
+        auto it = dist_points.upper_bound(dist);
+
+        if (it == dist_points.end()) {
+            ret = (--it)->second->fields.at(field);
+        } else {
+            ret = it->second->fields.at(field);
+        }
+    }
+
+    return ret;
 }
 
 void parser::set_if_ok(datapoint_ptr& data, EField field, std::optional<double> value)

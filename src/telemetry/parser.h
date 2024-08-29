@@ -6,6 +6,7 @@
 #include "utils/logging/logger.h"
 
 #include <filesystem>
+#include <map>
 
 namespace vgraph {
 namespace telemetry {
@@ -26,8 +27,10 @@ private:
     void update_calculated_fields(datapoint_seq& seq);
     void print_stats(datapoint_seq& seq);
 
-    double gradient_between(const datapoint_seq& seq, double dist_a, double dist_b);
-    std::vector<double> get_by_distance(const datapoint_seq& seq, double dist, EField field);
+    double gradient_between(const std::multimap<int, datapoint_ptr>& dist_points, int dist_a, int dist_b);
+
+    //last - if there are multiple values for key, return last, otherwise return first
+    double get_by_distance(const std::multimap<int, datapoint_ptr>& dist_points, int dist, EField field, bool last=true);
 
     void set_if_ok(datapoint_ptr& data, EField field, std::optional<double> value);
     std::optional<double> field_avg(datapoint_seq::const_reverse_iterator it,
