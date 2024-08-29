@@ -14,32 +14,41 @@
     </container>
 
     <!-- left column -->
-    <container x="230" y="1660">
+    <container x="230" y="1360">
         <container x="0" y="0">
+        </container>
+        <container x="0" y="150">
+        </container>
+        <container x="0" y="300">
             <widget type="string" x="0" y="0" align="right" font="DejaVu Sans 32" color="white" border-color="black" border-width="4" text="KM/H" />
             <widget type="value" x="0" y="38" align="right" font="DejaVu Sans 64" color="white" border-color="black" border-width="4" key="speed" precision="1" />
         </container>
-        <container x="0" y="150">
+        <container x="0" y="450">
             <widget type="string" x="0" y="0" align="right" font="DejaVu Sans 32" color="white" border-color="black" border-width="4" text="WATT" />
             <widget type="value" x="0" y="38" align="right" font="DejaVu Sans 64" color="white" border-color="black" border-width="4" key="power" precision="0" />
         </container>
-        <container x="0" y="300">
+        <container x="0" y="600">
             <widget type="string" x="0" y="0" align="right" font="DejaVu Sans 32" color="white" border-color="black" border-width="4" text="RPM" />
             <widget type="value" x="0" y="38" align="right" font="DejaVu Sans 64" color="white" border-color="black" border-width="4" key="cadence" precision="0" />
         </container>
     </container>
 
     <!-- right column -->
-    <container x="3770" y="1660">
+    <container x="3770" y="1360">
         <container x="0" y="0">
         </container>
         <container x="0" y="150">
+        </container>
+        <container x="0" y="300">
+        </container>
+        <container x="0" y="450">
             <widget type="string" x="0" y="0" align="right" font="DejaVu Sans 32" color="white" border-color="black" border-width="4" text="GRADIENT (%)" />
             <widget type="value" x="0" y="38" align="right" font="DejaVu Sans 64" color="white" border-color="black" border-width="4" key="gradient" precision="1" />
         </container>
-        <container x="0" y="300">
+        <container x="0" y="600">
             <widget type="string" x="0" y="0" align="right" font="DejaVu Sans 32" color="white" border-color="black" border-width="4" text="KM" />
             <widget type="value" x="0" y="38" align="right" font="DejaVu Sans 64" color="white" border-color="black" border-width="4" key="distance" precision="1" />
         </container>
     </container>
 </layout>
+

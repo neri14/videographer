@@ -9,9 +9,7 @@ target_sources(vgraph_lib
     PUBLIC
         datapoint.h
         field.h
-        value.h
         parser.h
         fit_parser.h
         telemetry.h
-        
 )

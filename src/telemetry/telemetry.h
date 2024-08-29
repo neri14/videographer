@@ -11,11 +11,11 @@ namespace telemetry {
 
 class telemetry {
 public:
-    telemetry(std::shared_ptr<datapoint_sequence> seq, long offset=0);
+    telemetry(datapoint_seq seq, long offset=0);
     ~telemetry() = default;
 
-    std::shared_ptr<datapoint> get(double timestamp) const;
-    const std::vector<std::shared_ptr<datapoint>>& get_all() const;
+    datapoint_ptr get(double timestamp) const;
+    const datapoint_seq& get_all() const;
 
     static std::shared_ptr<telemetry> load(const std::string& path, std::optional<double> offset); // optional offset in seconds
 
@@ -24,8 +24,8 @@ private:
 
     long avg_interval = 0;
 
-    std::vector<std::shared_ptr<datapoint>> points;
-    std::map<long, std::shared_ptr<datapoint>> time_points;
+    datapoint_seq points;
+    std::map<long, datapoint_ptr> time_points;
 };
 
 } // namespace telemetry

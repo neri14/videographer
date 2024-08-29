@@ -19,6 +19,7 @@ namespace consts {
         {"power",            EField::Power},
         {"power3s",          EField::Power3s},
         {"power10s",         EField::Power10s},
+        {"power30s",         EField::Power30s},
         {"respiration_rate", EField::RespirationRate},
         {"heart_rate",       EField::HeartRate},
         {"grit",             EField::Grit},

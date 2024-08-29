@@ -21,6 +21,7 @@ enum class EField
     Power,
     Power3s,
     Power10s,
+    Power30s,
     RespirationRate,
     HeartRate,
     Grit,

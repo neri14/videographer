@@ -6,8 +6,7 @@
 #include "utils/logging/logger.h"
 
 #include <filesystem>
-#include <memory>
-#include <deque>
+#include <map>
 
 namespace vgraph {
 namespace telemetry {
@@ -17,18 +16,26 @@ public:
     parser() = default;
     ~parser() = default;
 
-    std::shared_ptr<datapoint_sequence> parse(const std::filesystem::path& path);
+    datapoint_seq parse(const std::filesystem::path& path);
 
 protected:
-    virtual std::shared_ptr<datapoint_sequence> parse_impl(const std::filesystem::path& path) = 0;
+    virtual datapoint_seq parse_impl(const std::filesystem::path& path) = 0;
 
 private:
     utils::logging::logger log{"parser"};
 
-    void update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq);
-    void print_stats(std::shared_ptr<datapoint_sequence>& seq);
+    void update_calculated_fields(datapoint_seq& seq);
+    void print_stats(datapoint_seq& seq);
 
-    std::optional<double> field_avg(std::deque<std::shared_ptr<datapoint>> points, EField field);
+    double gradient_between(const std::multimap<int, datapoint_ptr>& dist_points, int dist_a, int dist_b);
+
+    //last - if there are multiple values for key, return last, otherwise return first
+    double get_by_distance(const std::multimap<int, datapoint_ptr>& dist_points, int dist, EField field, bool last=true);
+
+    void set_if_ok(datapoint_ptr& data, EField field, std::optional<double> value);
+    std::optional<double> field_avg(datapoint_seq::const_reverse_iterator it,
+                                    datapoint_seq::const_reverse_iterator rend,
+                                    EField field, int count);
 };
 
 } // namespace telemetry

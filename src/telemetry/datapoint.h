@@ -2,7 +2,6 @@
 #define DATAPOINT_H
 
 #include "field.h"
-#include "value.h"
 
 #include <map>
 #include <vector>
@@ -17,7 +16,8 @@ struct datapoint {
     std::map<EField, double> fields;
 };
 
-using datapoint_sequence = std::vector<std::shared_ptr<datapoint>>;
+using datapoint_ptr = std::shared_ptr<datapoint>;
+using datapoint_seq = std::vector<datapoint_ptr>;
 
 } // namespace telemetry
 } // namespace vgraph
