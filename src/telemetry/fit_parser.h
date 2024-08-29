@@ -22,9 +22,9 @@ public:
 private:
     utils::logging::logger log{"fit_parser"};
 
-    std::shared_ptr<datapoint_sequence> parse_impl(const std::filesystem::path& path) override;
-    std::shared_ptr<datapoint_sequence> parse_filestream(std::fstream& file);
-    void handle_record(fit::RecordMesg& record, std::shared_ptr<datapoint_sequence> out_seq);
+    datapoint_seq parse_impl(const std::filesystem::path& path) override;
+    datapoint_seq parse_filestream(std::fstream& file);
+    void handle_record(fit::RecordMesg& record, datapoint_seq& out_seq);
     std::chrono::time_point<std::chrono::system_clock> parse_timestamp(FIT_UINT32 timestamp);
 
     class listener : public fit::RecordMesgListener

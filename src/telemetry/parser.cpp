@@ -21,7 +21,7 @@ struct stats {
     double avg = 0;
     int count = 0;
 
-    void add(std::shared_ptr<datapoint>& data, EField field) {
+    void add(const datapoint_ptr& data, EField field) {
         if (data->fields.contains(field)) {
             double val = data->fields.at(field);
 
@@ -32,29 +32,29 @@ struct stats {
     }
 };
 
-std::shared_ptr<datapoint_sequence> parser::parse(const std::filesystem::path& path)
+datapoint_seq parser::parse(const std::filesystem::path& path)
 {
-    std::shared_ptr<datapoint_sequence> seq = parse_impl(path);
+    datapoint_seq seq = parse_impl(path);
 
-    if (seq) {
+    if (!seq.empty()) {
         update_calculated_fields(seq);
         print_stats(seq);
     }
 
-    return seq;
+    return std::move(seq);
 }
 
-void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
+void parser::update_calculated_fields(datapoint_seq& seq)
 {
     log.info("Calculating additional data fields");
 
-    std::shared_ptr<datapoint> first = seq->front();
-    std::shared_ptr<datapoint> last = first;
+    datapoint_ptr first = seq.front();
+    datapoint_ptr last = first;
 
     double track_dist = 0;
 
-    for (auto it = seq->begin(); it != seq->end(); it++) {
-        std::shared_ptr<datapoint>& data = *it;
+    for (auto it = seq.begin(); it != seq.end(); it++) {
+        datapoint_ptr& data = *it;
 
         // track distance calculation
         track_dist += utils::geo_distance(
@@ -77,10 +77,10 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
         }
 
         // setting time averaged fields
-        set_if_ok(data, EField::Power3s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 3));
-        set_if_ok(data, EField::Power10s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 10));
-        set_if_ok(data, EField::Power30s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 30));
-        set_if_ok(data, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Altitude, 10));
+        set_if_ok(*it, EField::Power3s,        field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,     3));
+        set_if_ok(*it, EField::Power10s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    10));
+        set_if_ok(*it, EField::Power30s,       field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Power,    30));
+        set_if_ok(*it, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq.rend(), EField::Altitude, 10));
 
         // calculate gradient
         if (!data->fields.contains(EField::Gradient) && data->fields.contains(EField::SmoothAltitude)) {
@@ -100,7 +100,7 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
     }
 }
 
-void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
+void parser::print_stats(datapoint_seq& seq)
 {
     stats altitude;
     stats gradient;
@@ -109,7 +109,7 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     stats cadence;
     stats respiration;
 
-    for (auto data : *seq) {
+    for (auto data : seq) {
         altitude.add(data, EField::Altitude);
         gradient.add(data, EField::Gradient);
         speed.add(data, EField::Speed);
@@ -118,16 +118,16 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
         respiration.add(data, EField::RespirationRate);
     }
 
-    auto first = seq->front();
-    auto last = seq->back();
+    const datapoint_ptr& first = seq.front();
+    const datapoint_ptr& last = seq.back();
 
     double distance = 0;
     if (last->fields.contains(EField::Distance))
-        distance = last->fields[EField::Distance];
+        distance = last->fields.at(EField::Distance);
 
     double track_distance = 0;
     if (last->fields.contains(EField::TrackDistance))
-        track_distance = last->fields[EField::TrackDistance];
+        track_distance = last->fields.at(EField::TrackDistance);
 
     auto time = last->timestamp - first->timestamp;
     double hours = std::chrono::duration_cast<std::chrono::seconds>((time)).count() / 3600.0;
@@ -144,7 +144,7 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     log.info("Respiration Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} brpm", respiration.min, respiration.avg, respiration.max);
 }
 
-double parser::gradient_between(std::shared_ptr<datapoint_sequence>& seq, double dist_a, double dist_b)
+double parser::gradient_between(const datapoint_seq& seq, double dist_a, double dist_b)
 {
     if (dist_a <= dist_b) {
         return 0;
@@ -156,20 +156,23 @@ double parser::gradient_between(std::shared_ptr<datapoint_sequence>& seq, double
     return (alt_b - alt_a)/((dist_b - dist_a)*1000);
 }
 
-std::vector<double> parser::get_by_distance(std::shared_ptr<datapoint_sequence>& seq, double dist, EField field)
+std::vector<double> parser::get_by_distance(const datapoint_seq& seq, double dist, EField field)
 {
     std::vector<double> res;
+    //TODO
     return std::move(res);
 }
 
-void parser::set_if_ok(std::shared_ptr<datapoint>& data, EField field, std::optional<double> value)
+void parser::set_if_ok(datapoint_ptr& data, EField field, std::optional<double> value)
 {
     if (value) {
         data->fields[field] = *value;
     }
 }
 
-std::optional<double> parser::field_avg(datapoint_sequence::reverse_iterator it, datapoint_sequence::reverse_iterator rend, EField field, int count)
+std::optional<double> parser::field_avg(datapoint_seq::const_reverse_iterator it,
+                                        datapoint_seq::const_reverse_iterator rend,
+                                        EField field, int count)
 {
     int i = 0;
     double total = 0.0;

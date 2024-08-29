@@ -9,18 +9,18 @@ namespace consts {
     const unsigned int garmin_epoch = 631065600; // seconds since 1970-01-01 00:00:00 to 1989-12-31 00:00:00
 }
 
-std::shared_ptr<datapoint_sequence> fit_parser::parse_impl(const std::filesystem::path& path)
+datapoint_seq fit_parser::parse_impl(const std::filesystem::path& path)
 {
     log.info("Decoding FIT file {}", path.string());
 
     if (!std::filesystem::exists(path)) {
         log.error("File does not exist: {}", path.string());
-        return nullptr;
+        return {};
     }
 
     if (path.extension() != ".fit") {
         log.error("File extension is not .fit: {}", path.string());
-        return nullptr;
+        return {};
     }
 
     std::fstream file;
@@ -28,18 +28,18 @@ std::shared_ptr<datapoint_sequence> fit_parser::parse_impl(const std::filesystem
 
     if (!file.is_open()) {
         log.error("Error opening file {}", path.string());
-        return nullptr;
+        return {};
     }
 
-    std::shared_ptr<datapoint_sequence> ptr = parse_filestream(file);
-    if (ptr) {
+    datapoint_seq seq(parse_filestream(file));
+    if (!seq.empty()) {
         log.info("Decoded FIT file {}", path.string());
     }
 
-    return ptr;
+    return std::move(seq);
 }
 
-std::shared_ptr<datapoint_sequence> fit_parser::parse_filestream(std::fstream& file)
+datapoint_seq fit_parser::parse_filestream(std::fstream& file)
 {
     fit::Decode decode;
     if (!decode.CheckIntegrity(file)) {
@@ -49,8 +49,8 @@ std::shared_ptr<datapoint_sequence> fit_parser::parse_filestream(std::fstream& f
     using std::placeholders::_1;
 
     fit::MesgBroadcaster msg_broadcaster;
-    std::shared_ptr<datapoint_sequence> seq = std::make_shared<datapoint_sequence>();
-    listener listen(std::bind(&fit_parser::handle_record, this, _1, seq));
+    datapoint_seq seq;
+    listener listen(std::bind(&fit_parser::handle_record, this, _1, std::ref(seq)));
 
     msg_broadcaster.AddListener(listen);
 
@@ -61,20 +61,20 @@ std::shared_ptr<datapoint_sequence> fit_parser::parse_filestream(std::fstream& f
    catch (const fit::RuntimeException& e)
    {
       log.error("Exception decoding file: {}", e.what());
-      return nullptr;
+      return {};
    }
    catch (...)
    {
 	   log.error("Exception decoding file");
-      return nullptr;
+      return {};
    }
 
-    return seq;
+    return std::move(seq);
 }
 
-void fit_parser::handle_record(fit::RecordMesg& record, std::shared_ptr<datapoint_sequence> out_seq)
+void fit_parser::handle_record(fit::RecordMesg& record, datapoint_seq& out_seq)
 {
-    std::shared_ptr<vgraph::telemetry::datapoint> data = std::make_shared<vgraph::telemetry::datapoint>();
+    datapoint_ptr data = std::make_shared<datapoint>();
 
     if (record.IsTimestampValid())
         data->timestamp = parse_timestamp(record.GetTimestamp());
@@ -107,7 +107,7 @@ void fit_parser::handle_record(fit::RecordMesg& record, std::shared_ptr<datapoin
     if (record.IsFlowValid())
         data->fields[EField::Flow] = record.GetFlow();
 
-    out_seq->push_back(data);
+    out_seq.push_back(std::move(data));
 }
 
 // timestamp: seconds since UTC 00:00 Dec 31 1989
