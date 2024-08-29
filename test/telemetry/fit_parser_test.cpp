@@ -49,8 +49,6 @@ TEST_F(fit_parser_test, parse_correct_file_returns_sequence)
 {
     auto retval = uut->parse(consts::fit_path);
     ASSERT_NE(nullptr, retval);
-
-    //TODO to be implemented
 }
 
 } // namespace telemetry

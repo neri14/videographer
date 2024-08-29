@@ -170,7 +170,7 @@ int argument_parser::get(const std::string& key) const
         throw argument_exception(std::format("Value '{}' of argument '{}' is out of range", val[0], key));
     }
     return ret;
-}//FIXME to be refactored after merging with improved arguments parser
+}
 
 template <>
 std::vector<std::string> argument_parser::get(const std::string& key) const

@@ -362,7 +362,7 @@ bool generator::link_elements(const pipeline_element& src, const pipeline_elemen
 }
 
 bool generator::config_elements()
-{//FIXME try to incorporate congig params into path vectors and auto configure them (note: different types)
+{//FIXME try to incorporate config params into path vectors and auto configure them (note: different types)
     log.debug("Pipeline elements_ basic config");
 
     bool ok = true;

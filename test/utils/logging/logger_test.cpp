@@ -249,8 +249,6 @@ TEST_F(logger_test, error_sink_receives_error_logs_only_with_args)
     ASSERT_EQ(consts::expected_error_args, sink_stream.str());
 }
 
-//FIXME tests for set_log_level
-
 } // namespace logging
 } // namespace utils
 } // namespace vgraph
