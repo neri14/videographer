@@ -90,6 +90,7 @@
         "typeindex": "cpp",
         "util": "cpp",
         "export": "cpp",
-        "assert": "cpp"
+        "assert": "cpp",
+        "ranges": "cpp"
     }
 }

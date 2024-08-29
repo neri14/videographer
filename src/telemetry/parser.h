@@ -28,7 +28,8 @@ private:
     void update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq);
     void print_stats(std::shared_ptr<datapoint_sequence>& seq);
 
-    std::optional<double> field_avg(std::deque<std::shared_ptr<datapoint>> points, EField field);
+    void set_if_ok(std::shared_ptr<datapoint>& data, EField field, std::optional<double> value);
+    std::optional<double> field_avg(datapoint_sequence::reverse_iterator it, datapoint_sequence::reverse_iterator rend, EField field, int count);
 };
 
 } // namespace telemetry

@@ -1,6 +1,8 @@
 #include "parser.h"
 #include "utils/geo.h"
 
+#include <ranges>
+
 namespace vgraph {
 namespace telemetry {
 namespace consts {
@@ -40,74 +42,57 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
 {
     log.info("Calculating additional data fields");
 
-    double total_dist = 0;
-
     std::shared_ptr<datapoint> first = seq->front();
+    std::shared_ptr<datapoint> last = first;
 
-    std::deque<std::shared_ptr<datapoint>> last10s;
-    std::deque<std::shared_ptr<datapoint>> last3s;
-    std::shared_ptr<datapoint> last;
+    double track_dist = 0;
 
-    for (std::shared_ptr<datapoint>& data : *seq) {
-        // handling of moving time windows
-        last10s.push_back(data);
-        last3s.push_back(data);
+    for (auto it = seq->begin(); it != seq->end(); it++) {
+        std::shared_ptr<datapoint>& data = *it;
 
-        if (last10s.size() > 10) {
-            last10s.pop_front();
-        }
-        if (last3s.size() > 3) {
-            last3s.pop_front();
-        }
+        // track distance calculation
+        track_dist += utils::geo_distance(
+            last->fields.at(EField::Latitude), last->fields.at(EField::Longitude),
+            data->fields.at(EField::Latitude), data->fields.at(EField::Longitude)) / 1000.0;
 
-        // handling track distance
-        if (last) {
-            total_dist += utils::geo_distance(
-                              last->fields.at(EField::Latitude),
-                              last->fields.at(EField::Longitude),
-                              data->fields.at(EField::Latitude),
-                              data->fields.at(EField::Longitude)) / 1000.0;
-        }
+        // set track distance field
+        data->fields[EField::TrackDistance] = track_dist;
 
-        // handling distance if not parsed from file
-        data->fields[EField::TrackDistance] = total_dist;
+        // set distance field from track distance if not parsed from file
         if (!data->fields.contains(EField::Distance)) {
-            data->fields[EField::Distance] = total_dist;
+            data->fields[EField::Distance] = track_dist;
         }
 
-        // handling average power and smoothed altitude
-        std::optional<double> power3s = field_avg(last3s, EField::Power);
-        if (power3s) {
-            data->fields[EField::Power3s] = *power3s;
-        }
-        std::optional<double> power10s = field_avg(last10s, EField::Power);
-        if (power10s) {
-            data->fields[EField::Power10s] = *power10s;
-        }
-        std::optional<double> s_alt = field_avg(last10s, EField::Altitude);
-        if (s_alt) {
-            data->fields[EField::SmoothAltitude] = *s_alt;
-        }
-
-        // handling speed if not parsed from file
         if (!data->fields.contains(EField::Speed)) {
-            double hours = std::chrono::duration_cast<std::chrono::seconds>((data->timestamp - first->timestamp)).count() / 3600.0;
-            data->fields[EField::Speed] = data->fields[EField::Distance] / hours;
+            double h = std::chrono::duration_cast<std::chrono::seconds>((data->timestamp - last->timestamp)).count() / 3600;
+            double km = data->fields.at(EField::Distance) - last->fields.at(EField::Distance);
+
+            data->fields[EField::Speed] = km / h;
         }
 
-        bool calculate_gradient = !data->fields.contains(EField::Gradient) &&
-                                  data->fields.contains(EField::SmoothAltitude) &&
-                                  data->fields.contains(EField::TrackDistance);
-        if (calculate_gradient) {
-            double dist = 1000 * (last10s.back()->fields[EField::TrackDistance] - last10s.front()->fields[EField::TrackDistance]);
-            if (dist > consts::min_dist_gradient) {
-                double elev = last10s.back()->fields[EField::SmoothAltitude] - last10s.front()->fields[EField::SmoothAltitude];
-                data->fields[EField::Gradient] = utils::gradient(dist, elev);
-            }
-        }
+        // setting time averaged fields
+        set_if_ok(data, EField::Power3s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 3));
+        set_if_ok(data, EField::Power10s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 10));
+        set_if_ok(data, EField::Power30s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 30));
+        set_if_ok(data, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Altitude, 10));
 
+        // store last point
         last = data;
     }
+
+    // for (std::shared_ptr<datapoint>& data : *seq) {
+        // handling gradient
+        // bool calculate_gradient = !data->fields.contains(EField::Gradient) &&
+        //                           data->fields.contains(EField::SmoothAltitude) &&
+        //                           data->fields.contains(EField::TrackDistance);
+        // if (calculate_gradient) {
+        //     double dist = 1000 * (last10s.back()->fields[EField::TrackDistance] - last10s.front()->fields[EField::TrackDistance]);
+        //     if (dist > consts::min_dist_gradient) {
+        //         double elev = last10s.back()->fields[EField::SmoothAltitude] - last10s.front()->fields[EField::SmoothAltitude];
+        //         data->fields[EField::Gradient] = utils::gradient(dist, elev);
+        //     }
+        // }
+    // }
 }
 
 void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
@@ -157,20 +142,25 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     log.info("Respiration Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} brpm", respiration.min, respiration.avg, respiration.max);
 }
 
-std::optional<double> parser::field_avg(std::deque<std::shared_ptr<datapoint>> points, EField field)
+void parser::set_if_ok(std::shared_ptr<datapoint>& data, EField field, std::optional<double> value)
 {
-    bool ok = false;
-    double sum = 0.0;
+    if (value) {
+        data->fields[field] = *value;
+    }
+}
 
-    for (std::shared_ptr<datapoint>& data : points) {
-        if (data->fields.contains(field)) {
-            sum += data->fields.at(field);
-            ok = true;
+std::optional<double> parser::field_avg(datapoint_sequence::reverse_iterator it, datapoint_sequence::reverse_iterator rend, EField field, int count)
+{
+    int i = 0;
+    double total = 0.0;
+    for (i=0; it != rend && i<count; it++, i++) {
+        if ((*it)->fields.contains(field)) {
+            total += (*it)->fields.at(field);
         }
     }
 
-    if (ok) {
-        return sum / points.size();
+    if (i) {
+        return total/i;
     }
     return std::nullopt;
 }
