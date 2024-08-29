@@ -7,6 +7,12 @@ namespace vgraph {
 namespace telemetry {
 namespace consts {
     double min_dist_gradient(10);// meters in 10s
+
+    // gradient windows in meters
+    double gradient_window_behind(0.015);
+    double gradient_window_ahead(0.005);
+    double gradient_cap_window_behind(gradient_window_behind*4);
+    double gradient_cap_window_ahead(gradient_window_ahead*4);
 }
 
 struct stats {
@@ -76,23 +82,22 @@ void parser::update_calculated_fields(std::shared_ptr<datapoint_sequence>& seq)
         set_if_ok(data, EField::Power30s, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Power, 30));
         set_if_ok(data, EField::SmoothAltitude, field_avg(std::make_reverse_iterator(it+1), seq->rend(), EField::Altitude, 10));
 
+        // calculate gradient
+        if (!data->fields.contains(EField::Gradient) && data->fields.contains(EField::SmoothAltitude)) {
+            double grad = gradient_between(seq, track_dist - consts::gradient_window_behind, track_dist + consts::gradient_window_ahead);
+            double cap = gradient_between(seq, track_dist - consts::gradient_cap_window_behind, track_dist + consts::gradient_cap_window_ahead);
+
+            if (std::abs(grad) > std::abs(cap)) {
+                grad = grad*cap > 0 ? cap : -cap; 
+                // convert cap to gradient sign if needed
+            }
+
+            data->fields[EField::Gradient] = grad*100;//convert to pct
+        }
+
         // store last point
         last = data;
     }
-
-    // for (std::shared_ptr<datapoint>& data : *seq) {
-        // handling gradient
-        // bool calculate_gradient = !data->fields.contains(EField::Gradient) &&
-        //                           data->fields.contains(EField::SmoothAltitude) &&
-        //                           data->fields.contains(EField::TrackDistance);
-        // if (calculate_gradient) {
-        //     double dist = 1000 * (last10s.back()->fields[EField::TrackDistance] - last10s.front()->fields[EField::TrackDistance]);
-        //     if (dist > consts::min_dist_gradient) {
-        //         double elev = last10s.back()->fields[EField::SmoothAltitude] - last10s.front()->fields[EField::SmoothAltitude];
-        //         data->fields[EField::Gradient] = utils::gradient(dist, elev);
-        //     }
-        // }
-    // }
 }
 
 void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
@@ -102,7 +107,6 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     stats speed;
     stats power;
     stats cadence;
-    stats heartrate;
     stats respiration;
 
     for (auto data : *seq) {
@@ -111,7 +115,6 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
         speed.add(data, EField::Speed);
         power.add(data, EField::Power);
         cadence.add(data, EField::Cadence);
-        heartrate.add(data, EField::HeartRate);
         respiration.add(data, EField::RespirationRate);
     }
 
@@ -138,8 +141,25 @@ void parser::print_stats(std::shared_ptr<datapoint_sequence>& seq)
     log.info("        Gradient Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} %",    gradient.min,    gradient.avg,    gradient.max);
     log.info("           Power Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} W",    power.min,       power.avg,       power.max);
     log.info("         Cadence Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} rpm",  cadence.min,     cadence.avg,     cadence.max);
-    log.info("      Heart Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} bpm",  heartrate.min,   heartrate.avg,   heartrate.max);
     log.info("Respiration Rate Min/Avg/Max: {:7.2f} / {:7.2f} / {:7.2f} brpm", respiration.min, respiration.avg, respiration.max);
+}
+
+double parser::gradient_between(std::shared_ptr<datapoint_sequence>& seq, double dist_a, double dist_b)
+{
+    if (dist_a <= dist_b) {
+        return 0;
+    }
+
+    double alt_a = get_by_distance(seq, dist_a, EField::Altitude).back();
+    double alt_b = get_by_distance(seq, dist_b, EField::Altitude).front();
+
+    return (alt_b - alt_a)/((dist_b - dist_a)*1000);
+}
+
+std::vector<double> parser::get_by_distance(std::shared_ptr<datapoint_sequence>& seq, double dist, EField field)
+{
+    std::vector<double> res;
+    return std::move(res);
 }
 
 void parser::set_if_ok(std::shared_ptr<datapoint>& data, EField field, std::optional<double> value)
