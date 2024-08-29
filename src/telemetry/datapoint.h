@@ -2,7 +2,6 @@
 #define DATAPOINT_H
 
 #include "field.h"
-#include "value.h"
 
 #include <map>
 #include <vector>
