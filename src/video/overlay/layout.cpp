@@ -17,7 +17,7 @@ namespace consts {
     const std::string font("DejaVu Sans {}");
     const int font_size(32);
 
-    const int rows(30);
+    const int rows(20);
     const int header_row_y(150);
     const int first_row_y(250);
     const int row_height(50);
