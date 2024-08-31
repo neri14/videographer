@@ -4,11 +4,10 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-widget::widget(unsigned int type, volatile_value_fun_t vfun):
+widget::widget(unsigned int type):
     static_widget_(type & EType_Static),
     dynamic_widget_(type & EType_Dynamic),
-    volatile_widget_(type & EType_Volatile),
-    volatile_value_fun(vfun)
+    volatile_widget_(type & EType_Volatile)
 {}
 
 void widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>&)
@@ -38,18 +37,15 @@ void widget::draw_dynamic(cairo_t* cr, std::shared_ptr<telemetry::datapoint> dat
     cairo_restore(cr);
 }
 
-void widget::draw_volatile(cairo_t* cr, double timestamp, telemetry::timedatapoint timedata_prev, telemetry::timedatapoint timedata_next)
+void widget::draw_volatile(cairo_t* cr, double timestamp, const telemetry::timedatapoint& timedata_prev, const telemetry::timedatapoint& timedata_next)
 {
     if (!volatile_widget_) {
         log.warning("Volatile widget error: Called draw_volatile on widget without volatile element");
         return;
     }
-    if (!volatile_value_fun) {
-        log.warning("Volatile widget error: Missing converter function");
-    }
 
     cairo_save(cr);
-    draw_volatile_impl(cr, volatile_value_fun(timestamp, timedata_prev, timedata_next));
+    draw_volatile_impl(cr, get_volatile_value(timestamp, timedata_prev, timedata_next));
     cairo_restore(cr);
 }
 
@@ -76,6 +72,9 @@ void widget::draw_dynamic_impl(cairo_t*, std::shared_ptr<telemetry::datapoint>)
 
 void widget::draw_volatile_impl(cairo_t* cr, double value)
 {/*noop*/}
+
+double widget::get_volatile_value(double, const telemetry::timedatapoint&, const telemetry::timedatapoint&)
+{ return 0; }
 
 } // namespace overlay
 } // namespace video

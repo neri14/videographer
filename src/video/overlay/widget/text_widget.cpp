@@ -15,9 +15,8 @@ text_widget::text_widget(unsigned int type,
                          const std::string& font,
                          const rgba& color,
                          const rgba& border_color,
-                         int border_width,
-                         volatile_value_fun_t vfun) :
-    widget::widget(type, vfun),
+                         int border_width) :
+    widget::widget(type),
     x_(x),
     y_(y),
     align_(align),

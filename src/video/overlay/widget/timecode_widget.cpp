@@ -16,8 +16,7 @@ timecode_widget::timecode_widget(int center) :
                 center, 10,
                 ETextAlign::Center,
                 "DejaVu Sans 64",
-                color::white, color::black, 4,
-                [](double timestamp, telemetry::timedatapoint, telemetry::timedatapoint)->double { return timestamp; })
+                color::white, color::black, 4)
 {}
 
 timecode_widget::~timecode_widget()
@@ -26,6 +25,11 @@ timecode_widget::~timecode_widget()
 void timecode_widget::draw_volatile_impl(cairo_t* cr, double timestamp)
 {
     draw_text(cr, timestamp_str(timestamp).c_str());
+}
+
+double timecode_widget::get_volatile_value(double timestamp, const telemetry::timedatapoint&, const telemetry::timedatapoint&)
+{
+    return timestamp;
 }
 
 std::string timecode_widget::timestamp_str(double timestamp) const
