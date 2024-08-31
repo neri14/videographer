@@ -2,18 +2,23 @@
 #include "utils/argument_parser.h"
 
 namespace vgraph {
+namespace consts {
+    int defult_alignment_clip_time(60);
+}
 namespace key {
     std::string help("help");
     std::string debug("debug");
     std::string gpu("gpu");
+    std::string timecode("timecode");
+    std::string alignment("alignment");
     std::string telemetry("telemetry");
     std::string layout("layout");
     std::string offset("offset");
     std::string input("input");
     std::string output("output");
-    std::string timecode("timecode");
     std::string resolution("resolution");
     std::string bitrate("bitrate");
+    std::string clip_time("clip_time");
 }
 
 /* helpers forward declarations */
@@ -64,6 +69,7 @@ utils::argument_parser prepare_parser()
     parser.add_argument(key::debug,      utils::argument().flag().option("-d").option("--debug")     .description("Enable debug logs"));
     parser.add_argument(key::gpu,        utils::argument().flag().option("-g").option("--gpu")       .description("Use Nvidia GPU for processing"));
     parser.add_argument(key::timecode,   utils::argument().flag().option("-c").option("--timecode")  .description("Draw a timecode on each frame"));
+    parser.add_argument(key::alignment,  utils::argument().flag().option("-l").option("--alignment") .description(std::format("Enable alignment mode ({}s clip unless overriden by -T)", consts::defult_alignment_clip_time)));
     parser.add_argument(key::telemetry,  utils::argument()       .option("-t").option("--telemetry") .description("Telemetry file path"));
     parser.add_argument(key::layout,     utils::argument()       .option("-a").option("--layout")    .description("Layout file path"));
     parser.add_argument(key::input,      utils::argument()       .option("-i").option("--input")     .description("Input video file path"));
@@ -71,6 +77,7 @@ utils::argument_parser prepare_parser()
     parser.add_argument(key::offset,     utils::argument()       .option("-s").option("--offset")    .description("Telemetry offset in seconds (video time at which track starts)"));
     parser.add_argument(key::resolution, utils::argument()       .option("-r").option("--resolution").description("Output video resolution, format: WIDTHxHEIGHT"));
     parser.add_argument(key::bitrate,    utils::argument()       .option("-b").option("--bitrate")   .description("Output video bitrate, in kbit/s"));
+    parser.add_argument(key::clip_time,  utils::argument()       .option("-T").option("--clip-time") .description("Generate clip limited to provided time in seconds (e.g. in combination with alignment mode)"));
 
     return parser;
 }
@@ -83,6 +90,7 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
     a.debug = parser.get<bool>(key::debug);
     a.gpu = parser.get<bool>(key::gpu);
     a.timecode = parser.get<bool>(key::gpu);
+    a.alignment_mode = parser.get<bool>(key::alignment);
 
     valid = read_value<std::string>(parser, key::telemetry, log, a.telemetry) && valid;
     valid = read_value<std::string>(parser, key::layout, log, a.layout) && valid;
@@ -90,10 +98,15 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
     valid = read_value<std::string>(parser, key::output, log, a.output) && valid;
     valid = read_value<double>(parser, key::offset, log, a.offset) && valid;
     valid = read_value<int>(parser, key::bitrate, log, a.bitrate) && valid;
+    valid = read_value<double>(parser, key::clip_time, log, a.clip_time) && valid;
     
     std::optional<std::string> res_str;
     if (read_value<std::string>(parser, key::resolution, log, res_str) && res_str) {
         valid = parse_resolution(*res_str, log, a.resolution) && valid;
+    }
+
+    if (a.alignment_mode && !a.clip_time) {
+        a.clip_time = consts::defult_alignment_clip_time;
     }
 
     if (!valid) {

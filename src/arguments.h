@@ -10,6 +10,7 @@ struct arguments {
     bool debug = false;
     bool gpu = false;
     bool timecode = false;
+    bool alignment_mode = false;
 
     std::optional<std::string> telemetry = std::nullopt;
     std::optional<std::string> layout = std::nullopt;
@@ -20,6 +21,8 @@ struct arguments {
 
     std::optional<std::pair<int, int>> resolution = std::nullopt;
     std::optional<int> bitrate = std::nullopt;
+
+    std::optional<double> clip_time = std::nullopt;
 
     static arguments parse(int argc, char* argv[]);
 };

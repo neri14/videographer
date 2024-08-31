@@ -65,6 +65,16 @@ namespace helper {
         ptr->pad_added_handler(src, new_pad);
     }
 
+    double to_seconds(GstClockTime timestamp)
+    {
+        return GST_TIME_AS_USECONDS(timestamp) / 1000000.0;
+    }
+
+    GstClockTime to_gst_time(double seconds)
+    {
+        return static_cast<GstClockTime>(seconds * GST_SECOND);
+    }
+
     /**NOTE:
       * should only be called from draw_cb due to static first_raw_stamp
       * hack for offsetting received timestamps into correct time domain
@@ -127,14 +137,16 @@ generator::generator(const std::string& input_path,
                    bool gpu,
                    std::pair<int,int> output_resolution,
                    int output_bitrate,
-                   bool debug):
+                   bool debug,
+                   std::optional<double> clip_length):
     gpu_(gpu),
     input_path_(input_path),
     output_path_(output_path),
     overlay_(overlay),
     output_resolution_(output_resolution),
     output_bitrate_(output_bitrate),
-    debug_(debug)
+    debug_(debug),
+    clip_length_(clip_length)
 {}
 
 generator::~generator()
@@ -429,6 +441,9 @@ bool generator::connect_signals()
 bool generator::execute()
 {
     log.info("Starting the pipeline execution");
+    if (clip_length_) {
+        log.info("Generating {:.2f}s clip", *clip_length_);
+    }
 
     log.debug("Setting pipeline state to PLAYING");
     GstStateChangeReturn ret = gst_element_set_state(elements_[elem::name::pipeline], GST_STATE_PLAYING);
@@ -446,7 +461,7 @@ bool generator::execute()
     bool failed = false;
 
     do {
-        msg = gst_bus_timed_pop_filtered(bus, 1000 * GST_MSECOND,
+        msg = gst_bus_timed_pop_filtered(bus, 200 * GST_MSECOND,
             static_cast<GstMessageType>(GST_MESSAGE_STATE_CHANGED | GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
         if (msg != NULL) {
@@ -488,6 +503,15 @@ bool generator::execute()
 
             gint64 pos, len;
             if (gst_element_query_position(ptr, GST_FORMAT_TIME, &pos) && gst_element_query_duration(ptr, GST_FORMAT_TIME, &len)) {
+
+                if (clip_length_ && *clip_length_ < helper::to_seconds(pos)) {
+                    log.info("Reached clip length of {}s ({}s)", *clip_length_, helper::to_seconds(pos));
+                    gst_element_send_event(ptr, gst_event_new_eos());
+                }
+
+                if (clip_length_) {
+                    len = helper::to_gst_time(*clip_length_);
+                }
                 double pct = 100.0 * static_cast<double>(pos) / static_cast<double>(len);
                 g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)%s",
                          GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct, debug_ ? "\n" : "\r");

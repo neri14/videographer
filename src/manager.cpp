@@ -65,7 +65,9 @@ void manager::run()
 
     auto t3 = std::chrono::high_resolution_clock::now();
 
-    video::generator gen(*args.input, *args.output, overlay, args.gpu, *args.resolution, *args.bitrate, args.debug);
+    video::generator gen(*args.input, *args.output, overlay,
+                         args.gpu, *args.resolution, *args.bitrate,
+                         args.debug, args.clip_time);
     gen.generate();
 
     auto t4 = std::chrono::high_resolution_clock::now();
