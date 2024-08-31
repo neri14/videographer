@@ -25,6 +25,7 @@ namespace key {
 utils::argument_parser prepare_parser();
 
 arguments read_args(const utils::argument_parser& parser, utils::logging::logger& log);
+void assert_arguments_valid(const arguments& args, utils::logging::logger& log);
 
 template <typename T>
 bool read_value(const utils::argument_parser& parser, const std::string& name, utils::logging::logger& log, std::optional<T>& value_out);
@@ -45,7 +46,9 @@ arguments arguments::parse(int argc, char* argv[])
             exit(0); //ok case
         }
 
-        return std::move(read_args(parser, log));
+        auto args =read_args(parser, log);
+        assert_arguments_valid(args, log);
+        return std::move(args);
 
     } catch (utils::argument_exception e) {
         log.error(e.what());
@@ -116,7 +119,7 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
     return std::move(a);
 }
 
-void assert_argument_set_valid(const arguments& args, utils::logging::logger& log)
+void assert_arguments_valid(const arguments& args, utils::logging::logger& log)
 {
     bool valid = true;
 
@@ -136,8 +139,12 @@ void assert_argument_set_valid(const arguments& args, utils::logging::logger& lo
         log.error("Missing mandatory argument: bitrate");
         valid = false;
     }
+    if (args.alignment_mode && args.offset) {
+        log.error("Offset not allowed to be set when in alignment mode");
+        valid = false;
+    }
 
-    if (!false) {
+    if (!valid) {
         exit(1);
     }
 }

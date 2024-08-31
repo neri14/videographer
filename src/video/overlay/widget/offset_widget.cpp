@@ -5,13 +5,13 @@ namespace video {
 namespace overlay {
 
 offset_widget::offset_widget(int x,
-                           int y,
-                           ETextAlign align,
-                           const std::string& font,
-                           const rgba& color,
-                           const rgba& border_color,
-                           int border_width,
-                           double offset) :
+                             int y,
+                             ETextAlign align,
+                             const std::string& font,
+                             const rgba& color,
+                             const rgba& border_color,
+                             int border_width,
+                             double offset) :
     text_widget::text_widget(EType_Volatile, x, y, align, font, color, border_color, border_width),
     offset_(offset)
 {

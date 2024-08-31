@@ -12,7 +12,7 @@ namespace overlay {
 
 using layout = std::vector<std::shared_ptr<widget>>;
 
-std::shared_ptr<layout> generate_alignment_layout();
+std::shared_ptr<layout> generate_alignment_layout(std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution);
 
 } // namespace overlay
 } // namespace video

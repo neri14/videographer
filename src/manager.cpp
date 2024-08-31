@@ -49,7 +49,7 @@ void manager::run()
 
     std::shared_ptr<video::overlay::layout> lay = nullptr;
     if (args.alignment_mode) {
-        lay = video::overlay::generate_alignment_layout();
+        lay = video::overlay::generate_alignment_layout(tele, *args.resolution);
     } else if (args.layout) {
         video::overlay::layout_parser layout_parser;
         lay = layout_parser.parse(*args.layout);
