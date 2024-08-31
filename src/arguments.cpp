@@ -89,7 +89,7 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
 
     a.debug = parser.get<bool>(key::debug);
     a.gpu = parser.get<bool>(key::gpu);
-    a.timecode = parser.get<bool>(key::gpu);
+    a.timecode = parser.get<bool>(key::timecode);
     a.alignment_mode = parser.get<bool>(key::alignment);
 
     valid = read_value<std::string>(parser, key::telemetry, log, a.telemetry) && valid;
