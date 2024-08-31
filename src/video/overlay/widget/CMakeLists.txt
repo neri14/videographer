@@ -12,6 +12,8 @@ target_sources(vgraph_lib
         map_widget.cpp
         timecode_widget.cpp
         offset_widget.cpp
+        rectangle_widget.cpp
+        line_widget.cpp
         text_align.cpp
         color.cpp
     PUBLIC
@@ -25,6 +27,8 @@ target_sources(vgraph_lib
         map_widget.h
         timecode_widget.h
         offset_widget.h
+        rectangle_widget.h
+        line_widget.h
         text_align.h
         color.h
 )

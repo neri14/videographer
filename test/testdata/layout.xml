@@ -15,17 +15,21 @@
 
     <!-- speed moving chart -->
     <container x="720" y="1910">
-        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="speed" window="15" />
+        <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="speed" window="15" />
     </container>
 
     <!-- power moving chart -->
     <container x="1620" y="1910">
-        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="power" window="15" />
+        <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="power" window="15" />
     </container>
 
     <!-- gradient moving chart -->
     <container x="2520" y="1910">
-        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="gradient" window="15" />
+        <widget type="line" x1="0" y1="100" x2="600" y2="102" color="#ffffffb0" width="2" />
+        <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="gradient" window="15" symmetric="true"/>
     </container>
 
     <!-- left column -->

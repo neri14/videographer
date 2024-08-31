@@ -14,7 +14,7 @@ namespace consts {
 moving_chart_widget::moving_chart_widget(int x, int y, int width, int height,
                                          const rgba& line_color, int line_width,
                                          const rgba& point_color, int point_size,
-                                         const std::string& key, double window) :
+                                         const std::string& key, double window, bool symmetric) :
     widget(EType_Volatile),//FIXME replace with Volatile
     x_(x),
     y_(y),
@@ -26,7 +26,8 @@ moving_chart_widget::moving_chart_widget(int x, int y, int width, int height,
     point_radius_(point_size/2.0),
     field_(telemetry::map_key_to_field(key)),
     window_(window),
-    pix_per_s(width/window)
+    pix_per_s(width/window),
+    symmetric_(symmetric)
 {
     log.debug("Created chart widget");
 }
@@ -47,6 +48,11 @@ void moving_chart_widget::prepare(const std::vector<std::shared_ptr<telemetry::d
 
         min = std::min(min, val);
         max = std::max(max, val);
+    }
+
+    if (symmetric_) {
+        max = std::max(abs(min), abs(max));
+        min = -max;
     }
 
     if (min < max) {

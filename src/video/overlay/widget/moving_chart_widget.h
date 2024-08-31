@@ -17,7 +17,7 @@ public:
     moving_chart_widget(int x, int y, int width, int height,
                         const rgba& line_color, int line_width,
                         const rgba& point_color, int point_size,
-                        const std::string& key, double window);
+                        const std::string& key, double window, bool symmetric);
     ~moving_chart_widget();
 
     void prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& datapoints) override;
@@ -42,6 +42,8 @@ private:
 
     telemetry::EField field_;
     double window_;
+
+    bool symmetric_;
 
     std::vector<std::pair<double, double>> points;
 
