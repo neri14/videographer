@@ -14,8 +14,8 @@
     </container>
 
     <!-- power chart -->
-    <container x="1520" y="1810">
-        <widget type="moving-chart" x="0" y="0" width="800" height="30" line-color="white" line-width="4" point-color="red" point-size="12" x-key="distance" y-key="power" />
+    <container x="1320" y="1810">
+        <widget type="moving-chart" x="0" y="0" width="1200" height="300" line-color="white" line-width="4" point-color="red" point-size="12" key="power" window="30" />
     </container>
 
     <!-- left column -->

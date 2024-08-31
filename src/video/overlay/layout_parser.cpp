@@ -188,10 +188,10 @@ bool layout_parser::create_moving_chart_widget(pugi::xml_node node, int x_offset
     bool status = true;
 
     auto chrt = chart_params(node, x_offset, y_offset, status);
-    std::string x_key = mandatory_attribute(node, "x-key", status).as_string();
-    std::string y_key = mandatory_attribute(node, "y-key", status).as_string();
+    std::string key = mandatory_attribute(node, "key", status).as_string();
+    double window = mandatory_attribute(node, "window", status).as_double();
 
-    widgets->push_back(std::make_shared<moving_chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, x_key, y_key));
+    widgets->push_back(std::make_shared<moving_chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, key, window));
     return status;
 }
 
