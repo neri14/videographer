@@ -6,6 +6,7 @@
 
 #include <string>
 #include <cfloat>
+#include <deque>
 
 namespace vgraph {
 namespace video {
@@ -24,7 +25,9 @@ public:
 private:
     utils::logging::logger log{"moving_chart_widget"};
 
-    void draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data) override;
+    void draw_volatile_impl(cairo_t* cr, double timestamp, double value) override;
+
+    double get_volatile_value(double ts, const telemetry::timedatapoint& td_prev, const telemetry::timedatapoint& td_next) override;
 
     double translate(double value);
 
@@ -49,10 +52,7 @@ private:
     double pix_per_s = 0;
 
     bool valid = false;
-
-    cairo_surface_t* cache = nullptr;
-
-    double val_y;
+    std::deque<std::pair<double, double>> time_values;
 };
 
 } // namespace overlay

@@ -13,9 +13,19 @@
         <widget type="chart" x="0" y="850" width="800" height="100" line-color="white" line-width="4" point-color="red" point-size="12" x-key="distance" y-key="smooth_altitude" />
     </container>
 
-    <!-- power chart -->
-    <container x="1320" y="1810">
-        <widget type="moving-chart" x="0" y="0" width="1200" height="300" line-color="white" line-width="4" point-color="red" point-size="12" key="power" window="30" />
+    <!-- speed moving chart -->
+    <container x="720" y="1910">
+        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="speed" window="15" />
+    </container>
+
+    <!-- power moving chart -->
+    <container x="1620" y="1910">
+        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="power" window="15" />
+    </container>
+
+    <!-- gradient moving chart -->
+    <container x="2520" y="1910">
+        <widget type="moving-chart" x="0" y="0" width="600" height="200" line-color="#ffffff" line-width="4" point-color="red" point-size="12" key="gradient" window="15" />
     </container>
 
     <!-- left column -->

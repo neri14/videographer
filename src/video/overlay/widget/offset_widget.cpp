@@ -21,7 +21,7 @@ offset_widget::offset_widget(int x,
 offset_widget::~offset_widget()
 {}
 
-void offset_widget::draw_volatile_impl(cairo_t* cr, double value)
+void offset_widget::draw_volatile_impl(cairo_t* cr, double timestamp, double value)
 {
     draw_text(cr, std::format("{:10.6f}", value));
 }

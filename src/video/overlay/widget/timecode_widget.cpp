@@ -22,9 +22,9 @@ timecode_widget::timecode_widget(int center) :
 timecode_widget::~timecode_widget()
 {}
 
-void timecode_widget::draw_volatile_impl(cairo_t* cr, double timestamp)
+void timecode_widget::draw_volatile_impl(cairo_t* cr, double timestamp, double value)
 {
-    draw_text(cr, timestamp_str(timestamp).c_str());
+    draw_text(cr, timestamp_str(value).c_str());
 }
 
 double timecode_widget::get_volatile_value(double timestamp, const telemetry::timedatapoint&, const telemetry::timedatapoint&)

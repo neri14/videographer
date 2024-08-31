@@ -34,7 +34,7 @@ protected:
 
     virtual void draw_static_impl(cairo_t* cr);
     virtual void draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datapoint> data);
-    virtual void draw_volatile_impl(cairo_t* cr, double value);
+    virtual void draw_volatile_impl(cairo_t* cr, double timestamp, double value);
 
     virtual double get_volatile_value(double timestamp, const telemetry::timedatapoint& timedata_prev, const telemetry::timedatapoint& timedata_next);
 

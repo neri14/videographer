@@ -45,7 +45,7 @@ void widget::draw_volatile(cairo_t* cr, double timestamp, const telemetry::timed
     }
 
     cairo_save(cr);
-    draw_volatile_impl(cr, get_volatile_value(timestamp, timedata_prev, timedata_next));
+    draw_volatile_impl(cr, timestamp, get_volatile_value(timestamp, timedata_prev, timedata_next));
     cairo_restore(cr);
 }
 
@@ -70,7 +70,7 @@ void widget::draw_static_impl(cairo_t*)
 void widget::draw_dynamic_impl(cairo_t*, std::shared_ptr<telemetry::datapoint>)
 {/*noop*/}
 
-void widget::draw_volatile_impl(cairo_t* cr, double value)
+void widget::draw_volatile_impl(cairo_t* cr, double timestamp, double value)
 {/*noop*/}
 
 double widget::get_volatile_value(double, const telemetry::timedatapoint&, const telemetry::timedatapoint&)
