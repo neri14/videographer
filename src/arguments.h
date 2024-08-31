@@ -9,17 +9,17 @@ namespace vgraph {
 struct arguments {
     bool debug = false;
     bool gpu = false;
+    bool timecode = false;
 
     std::optional<std::string> telemetry = std::nullopt;
     std::optional<std::string> layout = std::nullopt;
-    std::string input = "";
-    std::string output = "";
+    std::optional<std::string> input = std::nullopt;
+    std::optional<std::string> output = std::nullopt;
 
     std::optional<double> offset = std::nullopt;
-    bool timecode = false;
 
-    std::pair<int, int> resolution = {3840,2160};
-    int bitrate = {80*1024};
+    std::optional<std::pair<int, int>> resolution = std::nullopt;
+    std::optional<int> bitrate = std::nullopt;
 
     static arguments parse(int argc, char* argv[]);
 };

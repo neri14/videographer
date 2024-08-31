@@ -123,7 +123,7 @@ bool operator==(const pipeline_element& lhs, const pipeline_element& rhs)
 
 generator::generator(const std::string& input_path,
                    const std::string& output_path,
-                   overlay::overlay& overlay,
+                   std::shared_ptr<overlay::overlay> overlay,
                    bool gpu,
                    std::pair<int,int> output_resolution,
                    int output_bitrate,
@@ -414,11 +414,13 @@ bool generator::connect_signals()
         ok = false;
     }
 
-    if (elements_.contains(elem::name::video_overlay)) {
-        g_signal_connect (elements_[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), const_cast<overlay::overlay*>(&overlay_));
-    } else {
-        log.error("Missing overlay element - unable to connect to 'draw' signal");
-        ok = false;
+    if (overlay_) {//FIXME overlay element shouldn't be added to pipeline if there is no overlay configured
+        if (elements_.contains(elem::name::video_overlay)) {
+            g_signal_connect (elements_[elem::name::video_overlay], "draw", G_CALLBACK (helper::draw_cb), overlay_.get());
+        } else {
+            log.error("Missing overlay element - unable to connect to 'draw' signal");
+            ok = false;
+        }
     }
 
     return ok;

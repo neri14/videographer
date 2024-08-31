@@ -30,7 +30,7 @@ class generator {
 public:
     generator(const std::string& input_path,
              const std::string& output_path,
-             overlay::overlay& overlay,
+             std::shared_ptr<overlay::overlay> overlay,
              bool gpu,
              std::pair<int, int> output_resolution,
              int output_bitrate,
@@ -67,7 +67,7 @@ private:
     utils::logging::logger log{"generator"};
     bool debug_;
 
-    overlay::overlay& overlay_;
+    std::shared_ptr<overlay::overlay> overlay_;
     std::map<std::string, GstElement*> elements_;
 
     bool gpu_;
