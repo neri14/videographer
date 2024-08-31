@@ -62,7 +62,7 @@ datapoint_ptr telemetry::get(double timestamp) const
     if (it->first > us) {
         it--;
     }
-    return (time_points.upper_bound(us))->second;
+    return it->second;
 }
 
 timedatapoint telemetry::get_td_prev(double timestamp) const
