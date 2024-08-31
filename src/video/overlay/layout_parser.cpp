@@ -3,6 +3,7 @@
 #include "widget/value_widget.h"
 #include "widget/timestamp_widget.h"
 #include "widget/chart_widget.h"
+#include "widget/moving_chart_widget.h"
 #include "widget/map_widget.h"
 #include "utils/logging/logger.h"
 
@@ -88,7 +89,7 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return false;
     }
 
-    std::string type(node.attribute("type").as_string());
+    const std::string type(node.attribute("type").as_string());
 
     if (type == "datetime") {
         return create_timestamp_widget(node, x_offset, y_offset);
@@ -100,6 +101,8 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return create_chart_widget(node, x_offset, y_offset);
     } else if (type == "map") {
         return create_map_widget(node, x_offset, y_offset);
+    } else if (type == "moving-chart") {
+        return create_moving_chart_widget(node, x_offset, y_offset);
     }
 
     log.error("Unknown widget type \"{}\"", type);
@@ -177,6 +180,18 @@ bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y
     std::string y_key = mandatory_attribute(node, "y-key", status).as_string();
 
     widgets->push_back(std::make_shared<chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, x_key, y_key));
+    return status;
+}
+
+bool layout_parser::create_moving_chart_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    auto chrt = chart_params(node, x_offset, y_offset, status);
+    std::string x_key = mandatory_attribute(node, "x-key", status).as_string();
+    std::string y_key = mandatory_attribute(node, "y-key", status).as_string();
+
+    widgets->push_back(std::make_shared<moving_chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, x_key, y_key));
     return status;
 }
 

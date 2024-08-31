@@ -34,6 +34,7 @@ private:
     bool create_string_widget(pugi::xml_node node, int x_offset, int y_offset);
     bool create_value_widget(pugi::xml_node node, int x_offset, int y_offset);
     bool create_chart_widget(pugi::xml_node node, int x_offset, int y_offset);
+    bool create_moving_chart_widget(pugi::xml_node node, int x_offset, int y_offset);
     bool create_map_widget(pugi::xml_node node, int x_offset, int y_offset);
 
     common_text_params text_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status);

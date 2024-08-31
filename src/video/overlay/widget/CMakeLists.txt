@@ -8,6 +8,7 @@ target_sources(vgraph_lib
         value_widget.cpp
         timestamp_widget.cpp
         chart_widget.cpp
+        moving_chart_widget.cpp
         map_widget.cpp
         timecode_widget.cpp
         offset_widget.cpp
@@ -20,6 +21,7 @@ target_sources(vgraph_lib
         value_widget.h
         timestamp_widget.h
         chart_widget.h
+        moving_chart_widget.cpp
         map_widget.h
         timecode_widget.h
         offset_widget.h
