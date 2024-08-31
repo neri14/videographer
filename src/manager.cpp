@@ -7,7 +7,9 @@
 
 #include "video/generator.h"
 #include "video/overlay/layout.h"
+#include "video/overlay/layout_parser.h"
 #include "video/overlay/overlay.h"
+#include "video/overlay/widget/timecode_widget.h"
 
 #include <iostream>
 #include <chrono>
@@ -46,7 +48,9 @@ void manager::run()
     auto t2 = std::chrono::high_resolution_clock::now();
 
     std::shared_ptr<video::overlay::layout> lay = nullptr;
-    if (args.layout) {
+    if (args.alignment_mode) {
+        lay = video::overlay::generate_alignment_layout();
+    } else if (args.layout) {
         video::overlay::layout_parser layout_parser;
         lay = layout_parser.parse(*args.layout);
         if (!lay) {
@@ -57,9 +61,16 @@ void manager::run()
         log.warning("NO LAYOUT FILE PROVIDED - NO DATA-DRIVEN OVERLAY WILL BE GENERATED");
     }
 
+    if (args.timecode) {
+        if (!lay) {
+            lay = std::make_shared<video::overlay::layout>();
+        }
+        lay->push_back(std::make_shared<video::overlay::timecode_widget>(args.resolution->first / 2));
+    }
+
     std::shared_ptr<video::overlay::overlay> overlay;
     if (tele != nullptr && lay != nullptr) {
-        overlay = std::make_shared<video::overlay::overlay>(lay, tele, *args.resolution, args.timecode);
+        overlay = std::make_shared<video::overlay::overlay>(lay, tele, *args.resolution);
         overlay->precache();
     }
 

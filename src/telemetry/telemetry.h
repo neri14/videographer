@@ -15,6 +15,8 @@ public:
     ~telemetry() = default;
 
     datapoint_ptr get(double timestamp) const;
+    timedatapoint get_td_prev(double timestamp) const;
+    timedatapoint get_td_next(double timestamp) const;
     const datapoint_seq& get_all() const;
 
     static std::shared_ptr<telemetry> load(const std::string& path, std::optional<double> offset); // optional offset in seconds

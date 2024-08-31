@@ -9,7 +9,7 @@ namespace vgraph {
 namespace video {
 namespace overlay {
 
-overlay::overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution, bool timecode):
+overlay::overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution):
     tele_(tele),
     layout_(*lay),
     width(resolution.first),
@@ -23,10 +23,6 @@ overlay::overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemet
 
     static_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
     dynamic_cache = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
-
-    if (timecode) {
-        tc_widget_ = std::make_shared<timecode_widget>(width/2);
-    }
 }
 
 overlay::~overlay()
@@ -84,8 +80,12 @@ void overlay::draw(cairo_t* cr, double timestamp)
     cairo_set_source_surface(cr, dynamic_cache, 0, 0);
     cairo_paint(cr);
 
-    if (tc_widget_) {
-        tc_widget_->draw(cr, timestamp);
+    if (!volatile_widgets_.empty()) {
+        auto prev = tele_->get_td_prev(timestamp);
+        auto next = tele_->get_td_next(timestamp);
+        for (auto w : volatile_widgets_) {
+            w->draw_volatile(cr, timestamp, prev, next);
+        }
     }
 
     auto t2 = std::chrono::high_resolution_clock::now();
@@ -125,6 +125,9 @@ void overlay::add_widget(std::shared_ptr<widget> ptr)
     }
     if (ptr->is_dynamic()) {
         dynamic_widgets_.push_back(ptr);
+    }
+    if (ptr->is_volatile()) {
+        volatile_widgets_.push_back(ptr);
     }
 }
 

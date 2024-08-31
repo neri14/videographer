@@ -461,7 +461,7 @@ bool generator::execute()
     bool failed = false;
 
     do {
-        msg = gst_bus_timed_pop_filtered(bus, 200 * GST_MSECOND,
+        msg = gst_bus_timed_pop_filtered(bus, 250 * GST_MSECOND,
             static_cast<GstMessageType>(GST_MESSAGE_STATE_CHANGED | GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
 
         if (msg != NULL) {

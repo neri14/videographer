@@ -4,10 +4,17 @@
 
 namespace vgraph {
 namespace telemetry {
+namespace consts {
+    double us(1000000);
+}
 namespace helper {
-    long in_microseconds(double t)
+    long s_to_us(double t)
     {
-        return std::lround(t * 1000000);
+        return std::lround(t * consts::us);
+    }
+    double us_to_s(long t)
+    {
+        return t / consts::us;
     }
 }
 
@@ -42,7 +49,7 @@ telemetry::telemetry(datapoint_seq seq, long offset) :
 
 datapoint_ptr telemetry::get(double timestamp) const
 {
-    long us = helper::in_microseconds(timestamp);
+    long us = helper::s_to_us(timestamp);
 
     if (time_points.begin()->first > us) {
         return nullptr;
@@ -51,7 +58,43 @@ datapoint_ptr telemetry::get(double timestamp) const
         return nullptr;
     }
 
-    return (--time_points.lower_bound(us))->second;
+    auto it = time_points.lower_bound(us);
+    if (it->first > us) {
+        it--;
+    }
+    return (time_points.upper_bound(us))->second;
+}
+
+timedatapoint telemetry::get_td_prev(double timestamp) const
+{
+    long us = helper::s_to_us(timestamp);
+    if (time_points.begin()->first > us) {
+        return timedatapoint(0, nullptr);
+    }
+    if (time_points.rbegin()->first < us) {
+        auto it = time_points.rbegin();
+        return timedatapoint(helper::us_to_s(it->first), it->second);
+    }
+
+    auto it = time_points.lower_bound(us);
+    if (it->first > us) {
+        it--;
+    }
+    return timedatapoint(helper::us_to_s(it->first), it->second);
+}
+
+timedatapoint telemetry::get_td_next(double timestamp) const
+{
+    long us = helper::s_to_us(timestamp);
+    if (time_points.rbegin()->first < us) {
+        return timedatapoint(0, nullptr);
+    }
+    if (time_points.begin()->first > us) {
+        auto it = time_points.begin();
+        return timedatapoint(helper::us_to_s(it->first), it->second);
+    }
+    auto it = time_points.lower_bound(us);
+    return timedatapoint(helper::us_to_s(it->first), it->second);
 }
 
 const std::vector<datapoint_ptr>& telemetry::get_all() const
@@ -76,7 +119,7 @@ std::shared_ptr<telemetry> telemetry::load(const std::string& path, std::optiona
         return nullptr;
     }
 
-    return std::make_shared<telemetry>(seq, offset ? helper::in_microseconds(*offset) : 0);
+    return std::make_shared<telemetry>(seq, offset ? helper::s_to_us(*offset) : 0);
 }
 
 } // namespace telemetry

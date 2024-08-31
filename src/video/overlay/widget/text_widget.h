@@ -13,7 +13,9 @@ namespace overlay {
 
 class text_widget: public widget {
 public:
-    text_widget(unsigned int type, int x, int y, ETextAlign align, const std::string& font, const rgba& color, const rgba& border_color, int border_width);
+    text_widget(unsigned int type, int x, int y, ETextAlign align, const std::string& font,
+                const rgba& color, const rgba& border_color, int border_width,
+                volatile_value_fun_t vfun=volatile_value_fun_t());
     ~text_widget();
 
 protected:

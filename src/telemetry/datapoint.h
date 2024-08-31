@@ -19,6 +19,8 @@ struct datapoint {
 using datapoint_ptr = std::shared_ptr<datapoint>;
 using datapoint_seq = std::vector<datapoint_ptr>;
 
+using timedatapoint = std::pair<double, datapoint_ptr>;
+
 } // namespace telemetry
 } // namespace vgraph
 
