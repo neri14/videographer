@@ -193,9 +193,20 @@ bool layout_parser::create_moving_chart_widget(pugi::xml_node node, int x_offset
 {
     bool status = true;
 
-    auto chrt = chart_params(node, x_offset, y_offset, status);
+    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
+    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
+    int width = mandatory_attribute(node, "width", status).as_int();
+    int height = mandatory_attribute(node, "height", status).as_int();
+    rgba line_color = color_from_string(mandatory_attribute(node, "line-color", status).as_string());
+    int line_width = mandatory_attribute(node, "line-width", status).as_int();
     std::string key = mandatory_attribute(node, "key", status).as_string();
     double window = mandatory_attribute(node, "window", status).as_double();
+    std::string font = mandatory_attribute(node, "text-font", status).as_string();
+    rgba text_color = color_from_string(mandatory_attribute(node, "text-color", status).as_string());
+    rgba text_border_color = color_from_string(mandatory_attribute(node, "text-border-color", status).as_string());
+    double text_border_width = mandatory_attribute(node, "text-border-width", status).as_int();
+    std::string format = mandatory_attribute(node, "text-format", status).as_string();
+
 
     bool symmetric = false;
     auto symmetric_attr = node.attribute("symmetric");
@@ -203,7 +214,9 @@ bool layout_parser::create_moving_chart_widget(pugi::xml_node node, int x_offset
         symmetric = symmetric_attr.as_bool();
     }
 
-    widgets->push_back(std::make_shared<moving_chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, key, window, symmetric));
+    widgets->push_back(std::make_shared<moving_chart_widget>(
+        x, y, width, height, line_color, line_width, key, window,
+        font, text_color, text_border_color, text_border_width, format, symmetric));
     return status;
 }
 

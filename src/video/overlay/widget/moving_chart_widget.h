@@ -3,6 +3,7 @@
 
 #include "widget.h"
 #include "color.h"
+#include "text_align.h"
 
 #include <string>
 #include <cfloat>
@@ -16,8 +17,9 @@ class moving_chart_widget: public widget {
 public:
     moving_chart_widget(int x, int y, int width, int height,
                         const rgba& line_color, int line_width,
-                        const rgba& point_color, int point_size,
-                        const std::string& key, double window, bool symmetric);
+                        const std::string& key, double window,
+                        const std::string& font, const rgba& text_color, const rgba& text_border_color,
+                        int text_border_width, const std::string& format, bool symmetric);
     ~moving_chart_widget();
 
     void prepare(const std::vector<std::shared_ptr<telemetry::datapoint>>& datapoints) override;
@@ -27,8 +29,8 @@ private:
 
     void draw_volatile_impl(cairo_t* cr, double timestamp, double value) override;
 
+    void draw_text(cairo_t* cr, int x, int y, double value);
     double get_volatile_value(double ts, const telemetry::timedatapoint& td_prev, const telemetry::timedatapoint& td_next) override;
-
     double translate(double value);
 
     int x_;
@@ -37,11 +39,15 @@ private:
     int height_;
     rgba line_color_;
     int line_width_;
-    rgba point_color_;
-    double point_radius_;
 
     telemetry::EField field_;
     double window_;
+
+    std::string font_;
+    rgba text_color_;
+    rgba text_border_color_;
+    int text_border_width_;
+    std::string format_;
 
     bool symmetric_;
 

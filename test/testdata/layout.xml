@@ -16,20 +16,23 @@
     <!-- speed moving chart -->
     <container x="720" y="1910">
         <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
-        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="speed" window="15" />
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" key="speed" window="15" 
+                text-font="DejaVu Sans 20" text-color="white" text-border-color="black" text-border-width="2" text-format="{:.1f} KM/H"/>
     </container>
 
     <!-- power moving chart -->
     <container x="1620" y="1910">
         <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
-        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="power" window="15" />
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" key="power" window="15"
+                text-font="DejaVu Sans 20" text-color="white" text-border-color="black" text-border-width="2" text-format="{:.0f} W"/>
     </container>
 
     <!-- gradient moving chart -->
     <container x="2520" y="1910">
         <widget type="line" x1="0" y1="100" x2="600" y2="102" color="#ffffffb0" width="2" />
         <widget type="rectangle" x="0" y="0" width="600" height="204" bg-color="#8c8c8c30" border-color="#fffffff0" border-width="2" />
-        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" point-color="red" point-size="12" key="gradient" window="15" symmetric="true"/>
+        <widget type="moving-chart" x="0" y="2" width="600" height="200" line-color="white" line-width="4" key="gradient" window="15" symmetric="true"
+                text-font="DejaVu Sans 20" text-color="white" text-border-color="black" text-border-width="2" text-format="{:.1f} %"/>
     </container>
 
     <!-- left column -->
