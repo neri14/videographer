@@ -83,10 +83,12 @@ void overlay::draw(cairo_t* cr, double timestamp)
     cairo_paint(cr);
 
     if (!volatile_widgets_.empty()) {
-        auto prev = tele_->get_td_prev(timestamp);
-        auto next = tele_->get_td_next(timestamp);
-        for (auto w : volatile_widgets_) {
-            w->draw_volatile(cr, timestamp, prev, next);
+        if (!!data) { //check that we're drawing any widgets on screen
+            auto prev = tele_->get_td_prev(timestamp);
+            auto next = tele_->get_td_next(timestamp);
+            for (auto w : volatile_widgets_) {
+                w->draw_volatile(cr, timestamp, prev, next);
+            }
         }
     }
 

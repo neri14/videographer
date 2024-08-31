@@ -109,12 +109,16 @@ void moving_chart_widget::draw_volatile_impl(cairo_t* cr, double ts, double valu
     }
     cairo_stroke(cache_cr);
 
-    //draw 'next cache' onto screen
+    //draw cache on screen
     cairo_set_source_surface(cr, cache, x_, y_ - consts::margin);
+    cairo_paint(cr);
 
+    //draw text
     draw_text(cr, x_ + width_ + consts::text_margin, y_ - consts::margin + last_y, value);
 
-    cairo_paint(cr);
+    //cleanup
+    cairo_destroy(cache_cr);
+    cairo_surface_destroy(cache);
 }
 
 void moving_chart_widget::draw_text(cairo_t* cr, int x, int y, double value)
@@ -177,10 +181,10 @@ double moving_chart_widget::get_volatile_value(double ts, const telemetry::timed
 
     double a = 0;
     double b = 0;
-    if (td_prev.second->fields.contains(field_)) {
+    if (td_prev.second && td_prev.second->fields.contains(field_)) {
         a = td_prev.second->fields.at(field_);
     }
-    if (td_next.second->fields.contains(field_)) {
+    if (td_next.second && td_next.second->fields.contains(field_)) {
         b = td_next.second->fields.at(field_);
     }
 
