@@ -3,7 +3,10 @@
 #include "widget/value_widget.h"
 #include "widget/timestamp_widget.h"
 #include "widget/chart_widget.h"
+#include "widget/moving_chart_widget.h"
 #include "widget/map_widget.h"
+#include "widget/line_widget.h"
+#include "widget/rectangle_widget.h"
 #include "utils/logging/logger.h"
 
 #include <string>
@@ -88,7 +91,7 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return false;
     }
 
-    std::string type(node.attribute("type").as_string());
+    const std::string type(node.attribute("type").as_string());
 
     if (type == "datetime") {
         return create_timestamp_widget(node, x_offset, y_offset);
@@ -100,6 +103,12 @@ bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offse
         return create_chart_widget(node, x_offset, y_offset);
     } else if (type == "map") {
         return create_map_widget(node, x_offset, y_offset);
+    } else if (type == "moving-chart") {
+        return create_moving_chart_widget(node, x_offset, y_offset);
+    } else if (type == "line") {
+        return create_line_widget(node, x_offset, y_offset);
+    } else if (type == "rectangle") {
+        return create_rectangle_widget(node, x_offset, y_offset);
     }
 
     log.error("Unknown widget type \"{}\"", type);
@@ -180,6 +189,37 @@ bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y
     return status;
 }
 
+bool layout_parser::create_moving_chart_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
+    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
+    int width = mandatory_attribute(node, "width", status).as_int();
+    int height = mandatory_attribute(node, "height", status).as_int();
+    rgba line_color = color_from_string(mandatory_attribute(node, "line-color", status).as_string());
+    int line_width = mandatory_attribute(node, "line-width", status).as_int();
+    std::string key = mandatory_attribute(node, "key", status).as_string();
+    double window = mandatory_attribute(node, "window", status).as_double();
+    std::string font = mandatory_attribute(node, "text-font", status).as_string();
+    rgba text_color = color_from_string(mandatory_attribute(node, "text-color", status).as_string());
+    rgba text_border_color = color_from_string(mandatory_attribute(node, "text-border-color", status).as_string());
+    double text_border_width = mandatory_attribute(node, "text-border-width", status).as_int();
+    std::string format = mandatory_attribute(node, "text-format", status).as_string();
+
+
+    bool symmetric = false;
+    auto symmetric_attr = node.attribute("symmetric");
+    if (symmetric_attr) {
+        symmetric = symmetric_attr.as_bool();
+    }
+
+    widgets->push_back(std::make_shared<moving_chart_widget>(
+        x, y, width, height, line_color, line_width, key, window,
+        font, text_color, text_border_color, text_border_width, format, symmetric));
+    return status;
+}
+
 bool layout_parser::create_map_widget(pugi::xml_node node, int x_offset, int y_offset)
 {
     bool status = true;
@@ -187,6 +227,37 @@ bool layout_parser::create_map_widget(pugi::xml_node node, int x_offset, int y_o
     auto chrt = chart_params(node, x_offset, y_offset, status);
 
     widgets->push_back(std::make_shared<map_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size));
+    return status;
+}
+
+bool layout_parser::create_line_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    int x1 = mandatory_attribute(node, "x1", status).as_int() + x_offset;
+    int y1 = mandatory_attribute(node, "y1", status).as_int() + y_offset;
+    int x2 = mandatory_attribute(node, "x2", status).as_int() + x_offset;
+    int y2 = mandatory_attribute(node, "y2", status).as_int() + y_offset;
+    rgba color = color_from_string(mandatory_attribute(node, "color", status).as_string());
+    int width = mandatory_attribute(node, "width", status).as_int();
+
+    widgets->push_back(std::make_shared<line_widget>(x1, y1, x2, y2, color, width));
+    return status;
+}
+
+bool layout_parser::create_rectangle_widget(pugi::xml_node node, int x_offset, int y_offset)
+{
+    bool status = true;
+
+    int x = mandatory_attribute(node, "x", status).as_int() + x_offset;
+    int y = mandatory_attribute(node, "y", status).as_int() + y_offset;
+    int width = mandatory_attribute(node, "width", status).as_int();
+    int height = mandatory_attribute(node, "height", status).as_int();
+    rgba bg_color = color_from_string(mandatory_attribute(node, "bg-color", status).as_string());
+    rgba border_color = color_from_string(mandatory_attribute(node, "border-color", status).as_string());
+    int border_width = mandatory_attribute(node, "border-width", status).as_int();
+
+    widgets->push_back(std::make_shared<rectangle_widget>(x, y, width, height, bg_color, border_color, border_width));
     return status;
 }
 

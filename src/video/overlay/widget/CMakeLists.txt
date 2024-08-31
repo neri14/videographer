@@ -8,9 +8,12 @@ target_sources(vgraph_lib
         value_widget.cpp
         timestamp_widget.cpp
         chart_widget.cpp
+        moving_chart_widget.cpp
         map_widget.cpp
         timecode_widget.cpp
         offset_widget.cpp
+        rectangle_widget.cpp
+        line_widget.cpp
         text_align.cpp
         color.cpp
     PUBLIC
@@ -20,9 +23,12 @@ target_sources(vgraph_lib
         value_widget.h
         timestamp_widget.h
         chart_widget.h
+        moving_chart_widget.cpp
         map_widget.h
         timecode_widget.h
         offset_widget.h
+        rectangle_widget.h
+        line_widget.h
         text_align.h
         color.h
 )

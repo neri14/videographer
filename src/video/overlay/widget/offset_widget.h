@@ -17,7 +17,7 @@ public:
 private:
     utils::logging::logger log{"offset_widget"};
 
-    void draw_volatile_impl(cairo_t* cr, double value) override;
+    void draw_volatile_impl(cairo_t* cr, double timestamp, double value) override;
     double get_volatile_value(double timestamp, const telemetry::timedatapoint&, const telemetry::timedatapoint&) override;
 
     double offset_;
