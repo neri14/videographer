@@ -1,5 +1,8 @@
 #include "generator.h"
 
+#include <iostream>
+#include <cmath>
+
 namespace vgraph {
 namespace video {
 
@@ -73,6 +76,17 @@ namespace helper {
     GstClockTime to_gst_time(double seconds)
     {
         return static_cast<GstClockTime>(seconds * GST_SECOND);
+    }
+
+    std::string timestamp_str(const GstClockTime& t)
+    {
+        return std::format("{:%H:%M:%S}",
+            std::chrono::duration_cast<std::chrono::seconds>(std::chrono::nanoseconds{t}));
+    }
+
+    std::string timestamp_str(const std::chrono::milliseconds t)
+    {
+        return std::format("{:%H:%M:%S}", std::chrono::duration_cast<std::chrono::seconds>(t));
     }
 
     /**NOTE:
@@ -448,6 +462,8 @@ bool generator::execute()
     log.debug("Setting pipeline state to PLAYING");
     GstStateChangeReturn ret = gst_element_set_state(elements_[elem::name::pipeline], GST_STATE_PLAYING);
 
+    start_time = std::chrono::high_resolution_clock::now();
+
     if (GST_STATE_CHANGE_FAILURE == ret) {
         log.error("Pipeline state change has failed (target state: PLAYING)");
         return false;
@@ -479,6 +495,9 @@ bool generator::execute()
                     failed = true;
                     break;
                 case GST_MESSAGE_EOS:
+                    if (!debug_) {
+                        std::cout << std::endl;
+                    }
                     log.info("Pipeline finished - End-Of-Stream reached");
                     terminate = true;
                     break;
@@ -501,20 +520,17 @@ bool generator::execute()
             //no message received during timeout - update time display
             GstElement* ptr = elements_[elem::name::pipeline];
 
-            gint64 pos, len;
+            long pos, len;
             if (gst_element_query_position(ptr, GST_FORMAT_TIME, &pos) && gst_element_query_duration(ptr, GST_FORMAT_TIME, &len)) {
-
                 if (clip_length_ && *clip_length_ < helper::to_seconds(pos)) {
                     log.info("Reached clip length of {}s ({}s)", *clip_length_, helper::to_seconds(pos));
                     gst_element_send_event(ptr, gst_event_new_eos());
                 }
-
                 if (clip_length_) {
                     len = helper::to_gst_time(*clip_length_);
                 }
-                double pct = 100.0 * static_cast<double>(pos) / static_cast<double>(len);
-                g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)%s",
-                         GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct, debug_ ? "\n" : "\r");
+
+                print_stats(pos, len);
             }
         }
     } while (!terminate);
@@ -566,6 +582,25 @@ void generator::pad_added_handler(GstElement* src, GstPad* new_pad)
 
     if (nullptr != new_pad_caps)
         gst_caps_unref(new_pad_caps);
+}
+
+void generator::print_stats(const GstClockTime& pos, const GstClockTime& len)
+{
+    double pct = 100.0 * static_cast<double>(pos) / static_cast<double>(len);
+    double rem_pct = std::max(100 - pct, 0.0);
+
+    auto proc_ms = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - start_time);
+    auto rem_ms = std::chrono::duration_cast<std::chrono::milliseconds>(rem_pct * proc_ms / pct);
+    double speed = (static_cast<double>(pos) / GST_MSECOND) / proc_ms.count();
+
+    char eol = debug_ ? '\n' : '\r';
+
+    std::cout << std::format("Video timestamp: {} / {} ({:.1f}%)  |  Speed: {:.1f}x  |  Processing time: {}  |  Time remaining: {}{}",
+        helper::timestamp_str(pos), helper::timestamp_str(len), pct, speed, helper::timestamp_str(proc_ms), helper::timestamp_str(rem_ms), eol
+        ) << std::flush;
+    
+    // g_print ("Time: %" GST_TIME_FORMAT " / %" GST_TIME_FORMAT " (%.1f%%)%s",
+    //          GST_TIME_ARGS(pos), GST_TIME_ARGS(len), pct, debug_ ? "\n" : "\r");
 }
 
 } // namespace video

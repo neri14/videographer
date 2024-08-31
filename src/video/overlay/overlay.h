@@ -34,7 +34,7 @@ private:
 
     std::shared_ptr<telemetry::telemetry> tele_;
 
-    long total_drawing_time = 0;
+    std::chrono::nanoseconds total_drawing_time = std::chrono::nanoseconds{0};
     int total_drawn_frames = 0;
 
     int cache_hit = 0;

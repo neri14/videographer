@@ -27,10 +27,12 @@ overlay::overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemet
 
 overlay::~overlay()
 {
-    double total_s = total_drawing_time/1000000.0;
-    log.info("Total drawing time: {:.3f} s ({:.6f} s/frame, {} frames)",
-             total_s, total_s/total_drawn_frames, total_drawn_frames);
-    log.info("Cache hit ratio {:.1f}%", (100.0*cache_hit)/(cache_hit+cache_miss));
+    log.info("Total drawing time: {:%H:%M:%S} ({:.6f} s/frame, {} frames)",
+             std::chrono::duration_cast<std::chrono::milliseconds>(total_drawing_time),
+             (total_drawing_time.count()/1000000000.0)/total_drawn_frames,
+             total_drawn_frames);
+
+    log.info("Cache hit ratio: {:.2f}%", (100.0*cache_hit)/(cache_hit+cache_miss));
 
     if (static_cache) {
         cairo_surface_destroy(static_cache);
@@ -57,7 +59,7 @@ void overlay::precache()
     cairo_destroy(cr);
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    total_drawing_time += std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    total_drawing_time += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
 }
 
 
@@ -89,7 +91,8 @@ void overlay::draw(cairo_t* cr, double timestamp)
     }
 
     auto t2 = std::chrono::high_resolution_clock::now();
-    total_drawing_time += std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    total_drawing_time += std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
+
     total_drawn_frames++;
 }
 

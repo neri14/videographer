@@ -83,14 +83,14 @@ void manager::run()
 
     auto t4 = std::chrono::high_resolution_clock::now();
 
-    log.info("Telemetry processing time: {:.3f} s",
-             std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1).count()/1000.0);
-    log.info("Overlay setup time: {:.3f} s",
-             std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2).count()/1000.0);
-    log.info("Video generation time: {:.3f} s",
-             std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t3).count()/1000.0);
-    log.info("Total time: {:.3f} s",
-             std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1).count()/1000.0);
+    log.info("Telemetry processing time: {:%H:%M:%S}",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t2 - t1));
+    log.info("Overlay setup time: {:%H:%M:%S}",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t3 - t2));
+    log.info("Video generation time: {:%H:%M:%S}",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t3));
+    log.info("Total time: {:%H:%M:%S}",
+             std::chrono::duration_cast<std::chrono::milliseconds>(t4 - t1));
 }
 
 void manager::enable_logging()

@@ -65,6 +65,8 @@ private:
 
     bool execute();
 
+    void print_stats(const GstClockTime& pos, const GstClockTime& len);
+
     utils::logging::logger log{"generator"};
     bool debug_;
 
@@ -85,6 +87,8 @@ private:
     std::vector<pipeline_element> output_path;
 
     std::optional<double> clip_length_;
+
+    std::chrono::time_point<std::chrono::high_resolution_clock> start_time;
 };
 
 } // namespace video
