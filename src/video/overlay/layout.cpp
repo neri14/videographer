@@ -1,205 +1,82 @@
 #include "layout.h"
-#include "widget/string_widget.h"
-#include "widget/value_widget.h"
-#include "widget/timestamp_widget.h"
-#include "widget/chart_widget.h"
-#include "widget/map_widget.h"
-#include "utils/logging/logger.h"
 
-#include <string>
+#include "telemetry/telemetry.h"
+#include "telemetry/field.h"
+#include "widget/string_widget.h"
+#include "widget/offset_widget.h"
+
+#include <format>
+#include <iostream>
 
 namespace vgraph {
 namespace video {
 namespace overlay {
+namespace consts {
+    const std::pair<double, double> base_resolution(3840, 2160);
 
-layout_parser::layout_parser():
-    widgets(std::make_shared<layout>())
-{}
+    const std::string font("DejaVu Sans {}");
+    const int font_size(32);
 
-std::shared_ptr<layout> layout_parser::parse(const std::string& path)
-{
-    pugi::xml_document doc;
-    auto result = doc.load_file(path.c_str());
+    const int rows(20);
+    const int header_row_y(150);
+    const int first_row_y(250);
+    const int row_height(50);
 
-    if (!result) {
-        log.error("Error loading xml file: {}", result.description());
-        return nullptr;
-    }
-
-    if (doc.children().empty()) {
-        log.error("Empty layout file");
-        return nullptr;
-    }
-
-    int count = 0;
-    for (auto& node : doc.children()) {
-        count++;
-    }
-    if (count > 1) {
-        log.error("More than one root node in layout file");
-        return nullptr;
-    }
-
-    pugi::xml_node root = doc.child("layout");
-    bool ok = load_widgets(root);
-
-    if (!ok) {
-        return nullptr;
-    }
-    return widgets;
+    const int timestamp_col_x(500);
+    const int speed_col_x(1400);
+    const int power_col_x(1650);
+    const int offset_col_x(2000);
 }
 
-bool layout_parser::load_widgets(pugi::xml_node node, int x_offset, int y_offset)
+std::shared_ptr<layout> generate_alignment_layout(std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution)
 {
-    std::string name(node.name());
+    double scale = std::min(resolution.first / consts::base_resolution.first, resolution.second / consts::base_resolution.second);
 
-    bool ok = true;
+    int font_size = static_cast<int>(consts::font_size * scale);
+    std::string font = std::vformat(consts::font, std::make_format_args(font_size));
 
-    if (std::string(node.name()) == "layout") {
-        //go fruther down
-        for (pugi::xml_node& child : node.children()) {
-            ok = ok && load_widgets(child, x_offset, y_offset);
+    auto lay = std::make_shared<layout>();
+    auto points = tele->get_all();
+    auto first = points.front();
+
+    lay->push_back(std::make_shared<string_widget>(
+        consts::timestamp_col_x * scale, consts::header_row_y * scale, ETextAlign::Left, font, color::white, color::black, 4*scale, "timestamp"));
+
+    lay->push_back(std::make_shared<string_widget>(
+        consts::speed_col_x * scale, consts::header_row_y * scale, ETextAlign::Right, font, color::white, color::black, 4*scale, "speed"));
+
+    lay->push_back(std::make_shared<string_widget>(
+        consts::power_col_x * scale, consts::header_row_y * scale, ETextAlign::Right, font, color::white, color::black, 4*scale, "3s power"));
+
+    lay->push_back(std::make_shared<string_widget>(
+        consts::offset_col_x * scale, consts::header_row_y * scale, ETextAlign::Right, font, color::white, color::black, 4*scale, "offset"));
+
+    int row = 0;
+    for (const auto& point : points) {
+        double row_y = consts::first_row_y * scale + consts::row_height * row * scale;
+
+        lay->push_back(std::make_shared<string_widget>(
+            consts::timestamp_col_x * scale, row_y, ETextAlign::Left, font, color::white, color::black, 4*scale,
+            std::format("{:%Y-%m-%d %H:%M:%S} UTC", std::chrono::time_point_cast<std::chrono::seconds>(point->timestamp))));
+
+        lay->push_back(std::make_shared<string_widget>(
+            consts::speed_col_x * scale, row_y, ETextAlign::Right, font, color::white, color::black, 4*scale,
+            std::format("{:.1f} km/h", point->fields.contains(telemetry::EField::Speed) ? point->fields.at(telemetry::EField::Speed) : 0.0)));
+
+        lay->push_back(std::make_shared<string_widget>(
+            consts::power_col_x * scale, row_y, ETextAlign::Right, font, color::white, color::black, 4*scale,
+            std::format("{:.0f} W", point->fields.contains(telemetry::EField::Power3s) ? point->fields.at(telemetry::EField::Power3s) : 0.0)));
+
+        lay->push_back(std::make_shared<offset_widget>(
+            consts::offset_col_x * scale, row_y, ETextAlign::Right, font, color::white, color::black, 4*scale,
+            std::chrono::duration_cast<std::chrono::microseconds>(point->timestamp - first->timestamp).count() / 1000000.0));
+        
+        if (++row > consts::rows) {
+            break;
         }
-    } else if (std::string(node.name()) == "container") {
-        //container node, pass x and y down the line
-        if (node.attribute("x")) {
-            x_offset += node.attribute("x").as_int();
-        }
-        if (node.attribute("y")) {
-            y_offset += node.attribute("y").as_int();
-        }
-        for (pugi::xml_node& child : node.children()) {
-            ok = ok && load_widgets(child, x_offset, y_offset);
-        }
-    } else if (std::string(node.name()) == "widget") {
-        ok = ok && create_widget(node, x_offset, y_offset);
-    } else {
-        log.error("Unexpected node \"{}\"", name);
-        ok = false;
     }
 
-    return ok;
-}
-
-bool layout_parser::create_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    if (!node.attribute("type")) {
-        log.error("Missing widget type");
-        return false;
-    }
-
-    std::string type(node.attribute("type").as_string());
-
-    if (type == "datetime") {
-        return create_timestamp_widget(node, x_offset, y_offset);
-    } else if (type == "string") {
-        return create_string_widget(node, x_offset, y_offset);
-    } else if (type == "value") {
-        return create_value_widget(node, x_offset, y_offset);
-    } else if (type == "chart") {
-        return create_chart_widget(node, x_offset, y_offset);
-    } else if (type == "map") {
-        return create_map_widget(node, x_offset, y_offset);
-    }
-
-    log.error("Unknown widget type \"{}\"", type);
-    return false;
-}
-
-layout_parser::common_text_params layout_parser::text_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status)
-{
-    return {
-        mandatory_attribute(node, "x", out_status).as_int() + x_offset,
-        mandatory_attribute(node, "y", out_status).as_int() + y_offset,
-        text_align_from_string(mandatory_attribute(node, "align", out_status).as_string()),
-        mandatory_attribute(node, "font", out_status).as_string(),
-        color_from_string(mandatory_attribute(node, "color", out_status).as_string()),
-        color_from_string(mandatory_attribute(node, "border-color", out_status).as_string()),
-        mandatory_attribute(node, "border-width", out_status).as_int()
-    };
-}
-
-layout_parser::common_chart_params layout_parser::chart_params(pugi::xml_node node, int x_offset, int y_offset, bool& out_status)
-{
-    return {
-        mandatory_attribute(node, "x", out_status).as_int() + x_offset,
-        mandatory_attribute(node, "y", out_status).as_int() + y_offset,
-        mandatory_attribute(node, "width", out_status).as_int(),
-        mandatory_attribute(node, "height", out_status).as_int(),
-        color_from_string(mandatory_attribute(node, "line-color", out_status).as_string()),
-        mandatory_attribute(node, "line-width", out_status).as_int(),
-        color_from_string(mandatory_attribute(node, "point-color", out_status).as_string()),
-        mandatory_attribute(node, "point-size", out_status).as_int()
-    };
-}
-
-bool layout_parser::create_timestamp_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    bool status = true;
-
-    auto txt = text_params(node, x_offset, y_offset, status);
-    std::string format = mandatory_attribute(node, "format", status).as_string();
-    int utcoffset = mandatory_attribute(node, "utcoffset", status).as_int();
-
-    widgets->push_back(std::make_shared<timestamp_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, format, utcoffset));
-    return status;
-}
-
-bool layout_parser::create_string_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    bool status = true;
-
-    auto txt = text_params(node, x_offset, y_offset, status);
-    std::string text = mandatory_attribute(node, "text", status).as_string();
-
-    widgets->push_back(std::make_shared<string_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, text));
-    return status;
-}
-
-bool layout_parser::create_value_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    bool status = true;
-
-    auto txt = text_params(node, x_offset, y_offset, status);
-    std::string key = mandatory_attribute(node, "key", status).as_string();
-    int precision = mandatory_attribute(node, "precision", status).as_int();
-
-    widgets->push_back(std::make_shared<value_widget>(txt.x, txt.y, txt.align, txt.font, txt.color, txt.border_color, txt.border_width, key, precision));
-    return status;
-}
-
-bool layout_parser::create_chart_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    bool status = true;
-
-    auto chrt = chart_params(node, x_offset, y_offset, status);
-    std::string x_key = mandatory_attribute(node, "x-key", status).as_string();
-    std::string y_key = mandatory_attribute(node, "y-key", status).as_string();
-
-    widgets->push_back(std::make_shared<chart_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size, x_key, y_key));
-    return status;
-}
-
-bool layout_parser::create_map_widget(pugi::xml_node node, int x_offset, int y_offset)
-{
-    bool status = true;
-
-    auto chrt = chart_params(node, x_offset, y_offset, status);
-
-    widgets->push_back(std::make_shared<map_widget>(chrt.x, chrt.y, chrt.width, chrt.height, chrt.line_color, chrt.line_width, chrt.point_color, chrt.point_size));
-    return status;
-}
-
-pugi::xml_attribute layout_parser::mandatory_attribute(pugi::xml_node node, const std::string& attr_name, bool& out_status)
-{
-    pugi::xml_attribute attr = node.attribute(attr_name.c_str());
-
-    if (!attr) {
-        log.error("Missing mandatory attribute \"{}\" in \"{}\" widget", attr_name, node.attribute("type").as_string());
-        out_status = false;
-    }
-
-    return attr;
+    return lay;
 }
 
 } // namespace overlay

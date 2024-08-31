@@ -30,11 +30,12 @@ class generator {
 public:
     generator(const std::string& input_path,
              const std::string& output_path,
-             overlay::overlay& overlay,
+             std::shared_ptr<overlay::overlay> overlay,
              bool gpu,
              std::pair<int, int> output_resolution,
              int output_bitrate,
-             bool debug);
+             bool debug,
+             std::optional<double> clip_length);
     ~generator();
 
     bool generate();
@@ -67,7 +68,7 @@ private:
     utils::logging::logger log{"generator"};
     bool debug_;
 
-    overlay::overlay& overlay_;
+    std::shared_ptr<overlay::overlay> overlay_;
     std::map<std::string, GstElement*> elements_;
 
     bool gpu_;
@@ -82,6 +83,8 @@ private:
     std::vector<pipeline_element> audio_path;
     std::vector<pipeline_element> video_path;
     std::vector<pipeline_element> output_path;
+
+    std::optional<double> clip_length_;
 };
 
 } // namespace video

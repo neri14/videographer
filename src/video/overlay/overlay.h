@@ -4,7 +4,6 @@
 #include "utils/logging/logger.h"
 #include "telemetry/telemetry.h"
 #include "widget/widget.h"
-#include "widget/timecode_widget.h"
 #include "layout.h"
 #include <memory>
 
@@ -18,7 +17,7 @@ namespace overlay {
 
 class overlay {
 public:
-    overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution, bool timecode);
+    overlay(std::shared_ptr<layout> lay, std::shared_ptr<telemetry::telemetry> tele, std::pair<int, int> resolution);
     ~overlay();
 
     void precache();
@@ -45,7 +44,7 @@ private:
 
     std::vector<std::shared_ptr<widget>> static_widgets_;
     std::vector<std::shared_ptr<widget>> dynamic_widgets_;
-    std::shared_ptr<timecode_widget> tc_widget_;
+    std::vector<std::shared_ptr<widget>> volatile_widgets_;
 
     cairo_surface_t* static_cache;
     cairo_surface_t* dynamic_cache;

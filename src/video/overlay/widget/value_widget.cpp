@@ -1,9 +1,5 @@
 #include "value_widget.h"
 
-extern "C" {
-    #include <pango/pangocairo.h>
-}
-
 namespace vgraph {
 namespace video {
 namespace overlay {

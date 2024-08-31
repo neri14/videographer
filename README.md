@@ -30,7 +30,7 @@
 
    example ffmpeg command: ```ffmpeg -ss 00:00:30.0 -to 00:01:00.0 -i input.mp4 -c copy output.mp4```
 
-1. Run alignment tool and figure out offset (tool instruction below; functionality to be integrated into main generator https://github.com/neri14/videographer/issues/21)
+1. Run generator in alignment mode (see instructions below) to determine telemetry offset
 
 1. Run generator app to generate final video
 
@@ -53,16 +53,11 @@ Packages required in system to build the application
 - pugixml
 
 
-## Alignment Tool
-
-Python alignment tool is located in tools/alignment.
+## Alignment Mode
 
 Basic usage based on speed visible on video:
 
-1. Create and enter virtualenv
-1. Install requirements from requirements.txt
-1. determine rough clip ```START``` and ```DURATION``` that will havevisible changes in speed on bike computer (within first 30s of FIT file track) 
-1. run ```python align.py -b <START> -t <DURATION> path_to_fit_file.fit path_to_video.mp4``` to generate alignment clip
-1. open video with your favorite video player and find exact frame at which speed changes
+1. run generator with ```--alignment``` to generate alignment clip (can also use ```--clip-time``` to change default 60s duration of alignment clip)
+1. open video in your favorite video player and find exact frame at which speed changes
 1. locate data frame with same speed change in alignment data and remember the ```OFFSET```
 1. use that ```OFFSET``` as input for main application to align the overlay
