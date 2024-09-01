@@ -46,6 +46,9 @@ execute_process(COMMAND git describe --tags --dirty=-dirty OUTPUT_VARIABLE VERSI
 target_compile_definitions(vgraph_lib PRIVATE VERSION_STR="${VERSION_STR}")
 target_compile_definitions(vgraph_lib PRIVATE BINARY_NAME="vgraph")
 
+# install setup
+install(TARGETS vgraph)
+
 ## TESTING
 
 # define test executable
