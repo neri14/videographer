@@ -56,6 +56,7 @@ public:
     std::map<std::string, std::vector<std::string>> get_raw() const;
 
     void print_help() const;
+    void print_version() const;
 
 private:
     void assert_key_exists(const std::string& key) const;

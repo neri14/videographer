@@ -11,6 +11,7 @@ namespace consts {
 }
 namespace key {
     std::string help("help");
+    std::string version("version");
     std::string config("config");
     std::string debug("debug");
     std::string gpu("gpu");
@@ -115,6 +116,11 @@ arguments arguments::parse(int argc, char* argv[])
             exit(0); //ok case
         }
 
+        if (parser.get<bool>(key::version)) {
+            parser.print_version();
+            exit(0); //ok case
+        }
+
         auto args =read_args(parser, log);
         assert_arguments_valid(args, log);
         return std::move(args);
@@ -138,6 +144,7 @@ utils::argument_parser prepare_parser()
     utils::argument_parser parser("vgraph");
 
     parser.add_argument(key::help,       utils::argument().flag().option("-h").option("--help")      .description("Print this help message"));
+    parser.add_argument(key::version,    utils::argument().flag()             .option("--version")   .description("Print version"));
     parser.add_argument(key::config,     utils::argument()       .option("-c").option("--config")    .description("Load config file"));
     parser.add_argument(key::debug,      utils::argument().flag().option("-d").option("--debug")     .description("Enable debug logs"));
     parser.add_argument(key::gpu,        utils::argument().flag().option("-g").option("--gpu")       .description("Use Nvidia GPU for processing"));

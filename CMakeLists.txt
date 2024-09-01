@@ -41,6 +41,9 @@ target_link_libraries(vgraph PRIVATE
                       vgraph_lib
                       )
 
+# compile in version string
+execute_process(COMMAND git describe --tags OUTPUT_VARIABLE VERSION_STR)
+target_compile_definitions(vgraph_lib PRIVATE VERSION_STR="${VERSION_STR}")
 
 ## TESTING
 

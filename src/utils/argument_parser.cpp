@@ -1,5 +1,7 @@
 #include "argument_parser.h"
 
+#include "version.h"
+
 #include <format>
 #include <iostream>
 #include <numeric>
@@ -222,6 +224,11 @@ void argument_parser::print_help() const
 {
     print_help_usage();
     print_help_details();
+}
+
+void argument_parser::print_version() const
+{
+    std::cout << std::format("{} {}", binary_name_, VERSION_STR) << std::endl;
 }
 
 void argument_parser::print_help_usage() const
