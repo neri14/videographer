@@ -66,21 +66,21 @@ TEST_F(argument_parser_test, creating_argument_with_duplicate_option_throws)
 /* ADDING ARGUMENT */
 TEST_F(argument_parser_test, duplicate_argument_key_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
     EXPECT_THROW(uut.add_argument("file", argument().option("-g").description("file description")), argument_exception);
 }
 
 TEST_F(argument_parser_test, duplicate_option_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
     EXPECT_THROW(uut.add_argument("file2", argument().option("-f").description("file description")), argument_exception);
 }
 
 TEST_F(argument_parser_test, argument_without_options_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     EXPECT_THROW(uut.add_argument("test", argument()), argument_exception);
 }
 
@@ -88,7 +88,7 @@ TEST_F(argument_parser_test, argument_without_options_throws)
 
 TEST_F(argument_parser_test, parsing_arguments)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
     uut.add_argument("verbose", argument().option("-v").option("--verbose").flag().description("verbose description"));
     uut.add_argument("file", argument().option("-f").description("file description"));
@@ -102,7 +102,7 @@ TEST_F(argument_parser_test, parsing_arguments)
 
 TEST_F(argument_parser_test, string_value_parsing)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
 
     create_args({"-f", "somefile"});
@@ -118,7 +118,7 @@ TEST_F(argument_parser_test, string_value_parsing)
 
 TEST_F(argument_parser_test, multiple_string_values_parsing)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
 
     create_args({"-f", "somefile", "-f", "otherfile"});
@@ -136,7 +136,7 @@ TEST_F(argument_parser_test, multiple_string_values_parsing)
 
 TEST_F(argument_parser_test, parsed_flag_short_is_true)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
 
     create_args({"-d"});
@@ -148,7 +148,7 @@ TEST_F(argument_parser_test, parsed_flag_short_is_true)
 
 TEST_F(argument_parser_test, parsed_flag_long_is_true)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
 
     create_args({"--debug"});
@@ -160,7 +160,7 @@ TEST_F(argument_parser_test, parsed_flag_long_is_true)
 
 TEST_F(argument_parser_test, parsing_undefined_argument_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
 
     create_args({"--not-debug"});
@@ -169,7 +169,7 @@ TEST_F(argument_parser_test, parsing_undefined_argument_throws)
 
 TEST_F(argument_parser_test, parsing_arguments_without_expected_value_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
 
     create_args({"-f"});
@@ -178,7 +178,7 @@ TEST_F(argument_parser_test, parsing_arguments_without_expected_value_throws)
 
 TEST_F(argument_parser_test, not_parsed_argument_value_is_not_present)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
 
     create_args({});
@@ -190,7 +190,7 @@ TEST_F(argument_parser_test, not_parsed_argument_value_is_not_present)
 
 TEST_F(argument_parser_test, not_prased_flag_is_false)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("help", argument().option("-h").option("--help").flag().description("help description"));
 
     create_args({});
@@ -202,7 +202,7 @@ TEST_F(argument_parser_test, not_prased_flag_is_false)
 
 TEST_F(argument_parser_test, undefined_argument_retrieval_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
 
     create_args({});
     uut.parse(argc, argv);
@@ -214,7 +214,7 @@ TEST_F(argument_parser_test, undefined_argument_retrieval_throws)
 
 TEST_F(argument_parser_test, flag_string_value_retrieval_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("debug", argument().option("-d").option("--debug").flag().description("debug description"));
 
     create_args({"-d"});
@@ -227,7 +227,7 @@ TEST_F(argument_parser_test, flag_string_value_retrieval_throws)
 
 TEST_F(argument_parser_test, unsupported_type_retrieval_throws)
 {
-    argument_parser uut("binary");
+    argument_parser uut;
     uut.add_argument("file", argument().option("-f").description("file description"));
 
     create_args({"-f", "somefile"});

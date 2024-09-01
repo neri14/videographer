@@ -141,7 +141,7 @@ arguments arguments::parse(int argc, char* argv[])
 /* helpers */
 utils::argument_parser prepare_parser()
 {
-    utils::argument_parser parser("vgraph");
+    utils::argument_parser parser;
 
     parser.add_argument(key::help,       utils::argument().flag().option("-h").option("--help")      .description("Print this help message"));
     parser.add_argument(key::version,    utils::argument().flag()             .option("--version")   .description("Print version"));

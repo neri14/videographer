@@ -33,7 +33,7 @@ struct argument {
 
 class argument_parser {
 public:
-    argument_parser(const std::string binary_name);
+    argument_parser();
     ~argument_parser() = default;
     argument_parser(const argument_parser&) = default;
     argument_parser(argument_parser&&) = default;
@@ -66,8 +66,6 @@ private:
 
     void print_help_usage() const;
     void print_help_details() const;
-
-    const std::string binary_name_;
 
     std::vector<std::string> keys_; // vector of all supported keys in order of addition
     std::map<std::string, argument> arguments_; // mapping argument keys to argument objects

@@ -55,8 +55,7 @@ argument& argument::description(const std::string& desc)
     return *this;
 };
 
-argument_parser::argument_parser(const std::string binary_name) :
-    binary_name_(binary_name)
+argument_parser::argument_parser()
 {}
 
 void argument_parser::add_argument(const std::string& key, const argument& arg)
@@ -228,7 +227,7 @@ void argument_parser::print_help() const
 
 void argument_parser::print_version() const
 {
-    std::cout << std::format("{} {}", binary_name_, VERSION_STR) << std::endl;
+    std::cout << std::format("{} {}", BINARY_NAME, VERSION_STR) << std::endl;
 }
 
 void argument_parser::print_help_usage() const
@@ -252,7 +251,7 @@ void argument_parser::print_help_usage() const
         opts += std::format("[{}]", str);
     }
 
-    std::cout << std::format("Usage: {} {}", binary_name_, opts) << std::endl;
+    std::cout << std::format("Usage: {} {}", BINARY_NAME, opts) << std::endl;
 }
 
 void argument_parser::print_help_details() const
