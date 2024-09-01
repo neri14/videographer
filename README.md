@@ -46,12 +46,14 @@ Packages required in system to build the application
 - CMake >= 3.23
 - Make / Ninja
 - GCC >= 14.x
-- googlemock
 - gstreamer >= 1.24
 - cairo
 - pango
 - pugixml
 
+For testing
+
+- googlemock
 
 ## Alignment Mode
 

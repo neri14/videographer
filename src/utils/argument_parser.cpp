@@ -268,11 +268,11 @@ void argument_parser::print_help_details() const
             str = std::format("{} {}", str, helper::to_upper(key));
         }
 
-        if (str.length() > 20) {
+        if (str.length() > 30) {
             std::cout << std::format("  {}", str) << std::endl;
             std::cout << std::format("                    {}", arg.description_) << std::endl;
         } else {
-            std::cout << std::format("  {:<16}  {}", str, arg.description_) << std::endl;
+            std::cout << std::format("  {:<30}  {}", str, arg.description_) << std::endl;
         }
     }
 }
