@@ -50,8 +50,8 @@ TEST(config_file_parsing_test, partial_config_file)
     EXPECT_TRUE(args.gpu);
     EXPECT_FALSE(args.timecode);
     EXPECT_FALSE(args.alignment_mode);
-    EXPECT_EQ("/some/absolute/path", args.telemetry);
-    EXPECT_EQ("./a/different/relative/path", args.layout);
+    EXPECT_EQ("./test/testdata/correct.fit", args.telemetry);
+    EXPECT_EQ("./test/testdata/layout.xml", args.layout);
     EXPECT_FALSE(args.input);
     EXPECT_FALSE(args.output);
     EXPECT_EQ(80000, args.bitrate);

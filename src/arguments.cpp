@@ -164,10 +164,10 @@ arguments read_args(const utils::argument_parser& parser, utils::logging::logger
         valid = parse_config_file(parser.get<std::string>(key::config), a);
     }
 
-    a.debug = parser.get<bool>(key::debug);
-    a.gpu = parser.get<bool>(key::gpu);
-    a.timecode = parser.get<bool>(key::timecode);
-    a.alignment_mode = parser.get<bool>(key::alignment);
+    a.debug = a.debug || parser.get<bool>(key::debug);
+    a.gpu = a.gpu || parser.get<bool>(key::gpu);
+    a.timecode = a.timecode || parser.get<bool>(key::timecode);
+    a.alignment_mode = a.alignment_mode || parser.get<bool>(key::alignment);
 
     valid = read_value<std::string>(parser, key::telemetry, log, a.telemetry) && valid;
     valid = read_value<std::string>(parser, key::layout, log, a.layout) && valid;
