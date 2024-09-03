@@ -59,6 +59,8 @@ Example screenshots from test video: [YouTube - NeriMTB](https://www.youtube.com
 
 ## Dependencies
 
+**TBD** - partial dependencies below
+
 Packages required in system to build the application
 
 - CMake >= 3.23
