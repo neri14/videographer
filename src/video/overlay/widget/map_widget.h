@@ -47,8 +47,9 @@ private:
     double min_y = DBL_MAX;
     double max_y = DBL_MIN;
 
-    double scale_x = 0;
-    double scale_y = 0;
+    double scale = 0;
+    double offset_x = 0;
+    double offset_y = 0;
     bool valid = false;
 };
 

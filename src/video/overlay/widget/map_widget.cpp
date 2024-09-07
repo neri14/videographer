@@ -54,8 +54,16 @@ void map_widget::prepare(const std::vector<std::shared_ptr<telemetry::datapoint>
     }
 
     if (min_x < max_x && min_y < max_y) {
-        scale_x = width_/(max_x-min_x);
-        scale_y = height_/(max_y-min_y);
+        double scale_x = width_/(max_x-min_x);
+        double scale_y = height_/(max_y-min_y);
+
+        if (scale_x < scale_y) {
+            scale = scale_x;
+            offset_y = (height_ - ((max_y - min_y) * scale_x))/2;
+        } else {
+            scale = scale_y;
+            offset_x = (width_ - ((max_x - min_x) * scale_y))/2;
+        }
 
         valid = true;
         log.debug("Prepared data for generating widget");
@@ -111,8 +119,8 @@ void map_widget::draw_dynamic_impl(cairo_t* cr, std::shared_ptr<telemetry::datap
 
 std::pair<int, int> map_widget::translate_xy(double x, double y)
 {
-    return std::make_pair(static_cast<int>(std::round(((x-min_x)*scale_x) + x_)),
-                          static_cast<int>(std::round(((y-min_y)*scale_y) + y_)));
+    return std::make_pair(static_cast<int>(std::round(((x-min_x)*scale) + x_ + offset_x)),
+                          static_cast<int>(std::round(((y-min_y)*scale) + y_ + offset_y)));
 }
 
 std::pair<double, double> map_widget::project(double x, double y)
