@@ -14,7 +14,7 @@ For best results use instructions below how to build a project, to satisfy depen
 
 ## Examples
 
-Example screenshots from test video: [YouTube - NeriMTB](https://www.youtube.com/watch?v=fkXM4v8afU4)
+Example screenshots from test video: [YouTube - NeriMTB](https://youtu.be/lMlHlpprMGI)
 
 ![Example 1](docs/images/example_01.png)
 
